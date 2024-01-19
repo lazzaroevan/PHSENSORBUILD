@@ -179,11 +179,3 @@ void ReportCouldNotCreateFile(String target){
   SendHTML_Content();
   SendHTML_Stop();
 }
-String file_size(int bytes){
-  String fsize = "";
-  if (bytes < 1024)                 fsize = String(bytes)+" B";
-  else if(bytes < (1024*1024))      fsize = String(bytes/1024.0,3)+" KB";
-  else if(bytes < (1024*1024*1024)) fsize = String(bytes/1024.0/1024.0,3)+" MB";
-  else                              fsize = String(bytes/1024.0/1024.0/1024.0,3)+" GB";
-  return fsize;
-}
