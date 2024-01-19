@@ -4,15 +4,15 @@
 #include "FS.h"
 #define ServerVersion ""
 String  webpage = "";
+String retIpAddress;
 #include "CSS.h"
 
 bool    SPIFFS_present = false;
 
 WebServer server(80);
 //Forward Declarations
-String file_size(int bytes);
-String tempValString = "";
-String phValString = "";
+char tempValString[7];
+char phValString[7];
 void HomePage();
 void DownloadFile(String filename);
 void SPIFFS_file_delete(String filename);
@@ -25,12 +25,18 @@ void live_view();
 void File_Download_PH_LOG();
 void File_Download_TEMP_LOG();
 void Delete_Log_Files();
-String file_size(int bytes);
 
-String serverSetup(String ssid, String password,bool isAP){
-  String retIpAddress;
+
+String serverSetup(char ssid[60],char password[60],bool isAP){
   if (isAP)
   {
+    WiFi.mode(WIFI_MODE_AP);
+    WiFi.softAP("PH Sensor");
+    retIpAddress = WiFi.softAPIP().toString();
+  }
+  else
+  {
+    WiFi.mode(WIFI_MODE_STA);
     WiFi.begin(ssid,password);
     while (WiFi.status() != WL_CONNECTED) 
     { // Wait for the Wi-Fi to connect
@@ -38,11 +44,6 @@ String serverSetup(String ssid, String password,bool isAP){
     }
     Serial.println("\nConnected to "+WiFi.SSID()+" Use IP address: "+WiFi.localIP().toString()); // Report which SSID and IP is in use
     retIpAddress = WiFi.localIP().toString();
-  }
-  else
-  {
-    WiFi.softAP("PH Sensor");
-    retIpAddress = WiFi.softAPIP().toString();
   }
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS initialisation failed...");
@@ -63,11 +64,12 @@ String serverSetup(String ssid, String password,bool isAP){
   ///////////////////////////// End of Request commands
   server.begin();
   Serial.println("HTTP server started");
+  Serial.println(retIpAddress);
   return retIpAddress;
 }
 void serverLoop(float tempVal,float phVal){
-  tempValString = String(tempVal);
-  phValString = String(phVal);
+  snprintf(tempValString, sizeof(tempValString), "%f", tempVal);
+  snprintf(phValString, sizeof(phValString), "%f", phVal);
   server.handleClient(); // Listen for client connections
 }
 void HomePage(){
@@ -91,9 +93,13 @@ void File_Download_TEMP_LOG()
 void live_view()
 {
   SendHTML_Header();
-  webpage += ("<meta http-equiv=\"refresh\" content=\"5\">");
-  webpage += ("<button disabled>PH Value: "+phValString+"</button>");
-  webpage += ("<button disabled>T  Value: "+tempValString+"</button>");
+  webpage += "<meta http-equiv=\"refresh\" content=\"5\">";
+  webpage += "<button disabled>PH Value: ";
+  webpage += phValString;
+  webpage += "</button>";
+  webpage += "<button disabled>T  Value: ";
+  webpage += +tempValString;
+  webpage += "</button>";
 
   append_page_footer();
   SendHTML_Content();
@@ -166,7 +172,9 @@ void ReportSPIFFSNotPresent(){
 void ReportFileNotPresent(String target){
   SendHTML_Header();
   webpage += F("<h3>File does not exist</h3>"); 
-  webpage += F("<a href='/"); webpage += target + "'>[Back]</a><br><br>";
+  webpage += F("<a href='/"); 
+  webpage += target;
+  webpage += "'>[Back]</a><br><br>";
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();
@@ -174,7 +182,9 @@ void ReportFileNotPresent(String target){
 void ReportCouldNotCreateFile(String target){
   SendHTML_Header();
   webpage += F("<h3>Could Not Create Uploaded File (write-protected?)</h3>"); 
-  webpage += F("<a href='/"); webpage += target + "'>[Back]</a><br><br>";
+  webpage += F("<a href='/");
+  webpage += target;
+  webpage += "'>[Back]</a><br><br>";
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();

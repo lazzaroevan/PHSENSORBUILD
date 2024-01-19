@@ -12,8 +12,8 @@
 
 TaskHandle_t wifiAPTaskHandle;
 
-String WIFI_SSID = "LIAL";
-String WIFI_PASSWORD = "47dce1bae3";
+char WIFI_SSID[64];
+char WIFI_PASSWORD[64];
 //#define WIFI_SSID "Achilles1G"
 //#define WIFI_PASSWORD "Odysseus277"
 #define address 99                                         //default I2C ID number for EZO pH Circuit.
@@ -32,22 +32,24 @@ bool lowCal = false;
 bool highCal = false;
 bool calibrating = false;
 int buttCount;
-const char * wifiTestLabel;
+char wifiTestLabel[64];
 char tempBuffer[7];
 char phBuffer[7];
-char phCalLabelBuff[62];
+char phCalLabelBuff[64];
 int samplingInterval = 100;
 float tempVal = 0;
 float phVal = 0;
 float celciusTemp = 0;
-const char * ipCharArray;
+char ipCharArray[100];
 //from ph sensor
 byte serial_event = 0;           //a flag to signal when data has been received from the pc/mac/other.
 byte received_from_computer = 0; //we need to know how many characters have been received.
 char computerdata[20];           //we make a 20 byte character array to hold incoming data from a pc/mac/other.
-String inputstring = "";                              //a string to hold incoming data from the PC
+const char * inputstring;                              //a string to hold incoming data from the PC
 boolean input_string_complete = false;                //have we received all the data from the PC
 boolean sensor_string_complete = false;               //have we received all the data from the Atlas Scientific product
+char strclear[100];
+
 
 void closeWifiServer()
 {
@@ -60,7 +62,7 @@ void closeWifiServer()
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
-  inputstring = Serial.readStringUntil(13);                                      //read the string until we see a <CR>
+  inputstring = Serial.readStringUntil(13).c_str();                                      //read the string until we see a <CR>
   input_string_complete = true;                                                  //set the flag used to tell if we have received a completed string from the PC
 }
 
@@ -78,12 +80,15 @@ void sendPHCode(String code)
 
 void wifiAPLoop(void *pvParameters)
 {
-    WiFi.mode(WIFI_MODE_AP);
     Serial.println("Starting Server....");
-    String connectingString = "Creating access point....";
-    ipCharArray = connectingString.c_str();
-    String tempIPString = "Connect to the PHSENSOR WiFi and navigate to: \"" + serverSetup(WIFI_SSID,WIFI_PASSWORD,false) + "\" in your browser.";
-    ipCharArray = tempIPString.c_str();
+    char connectingString[64];
+    strcat(connectingString,"Creating access point....");
+    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
+    char tempIPString[64];
+    strcat(tempIPString,"Connect to the PHSENSOR WiFi and navigate to: \"");
+    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,true).c_str());
+    strcat(tempIPString, "\" in your browser.");
+    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
     while(wifiServerUp)
     {
         serverLoop(celciusTemp,phVal);
@@ -96,10 +101,16 @@ void wifiAPLoop(void *pvParameters)
 void wifiSTALoop(void *pvParameters)
 {
     Serial.println("Starting Server....");
-    String connectingString = "Connecting to: " + WIFI_SSID;
-    ipCharArray = connectingString.c_str();
-    String tempIPString = "Connected to :" + WIFI_SSID + ". Navigate to: \"" + serverSetup(WIFI_SSID,WIFI_PASSWORD,false) + "\" in your browser.";
-    ipCharArray = tempIPString.c_str();
+    char connectingString[64];
+    strcat(connectingString,"Connecting to: ");
+    strcat(connectingString,WIFI_SSID);
+    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
+    char tempIPString[64] = "Connected to :";
+    strcat(tempIPString, WIFI_SSID);
+    strcat(tempIPString,". Navigate to: \"");
+    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,false).c_str());
+    strcat(tempIPString,"\" in your browser.");
+    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
     while(wifiServerUp)
     {
         serverLoop(celciusTemp,phVal);
@@ -114,7 +125,7 @@ void phSenseGetVal(void *pvParameters)
     Serial.println("PHSENSE VTASK BEGINING");
     int baudRate = 9600;
     Serial2.begin(baudRate, SERIAL_8N1, inputOnlyRx, useableTx);
-    String sensorstring = "";                             //a string to hold the data from the Atlas Scientific product
+    String sensorstring;                             //a string to hold the data from the Atlas Scientific product
     Serial2.print("\r");
     Serial2.print("*OK,0\r");
     Serial2.print("C,0\r");
@@ -123,7 +134,9 @@ void phSenseGetVal(void *pvParameters)
     while(phSenseActive)
     {
         delay(1000);
-        Serial2.print("RT,"+String(celciusTemp)+"\r");
+        Serial2.print("RT,");
+        Serial2.print(celciusTemp);
+        Serial2.print("\r");
         while(!sensor_string_complete)
         {   
             if (Serial2.available() > 0) 
@@ -156,7 +169,7 @@ void wifiScan(void *pvParameters)
     WiFi.disconnect();
     delay(100);
     int n = WiFi.scanNetworks();
-    String ssids = "";
+    String ssids;
     String ssidArray[n];
     int32_t rssiArray[n];
     int32_t tempInt;
@@ -164,7 +177,7 @@ void wifiScan(void *pvParameters)
     String tempString;
     for(int i = 0; i < n; i++)
     {
-        ssidArray[i]=WiFi.SSID(i);
+        ssidArray[i]=WiFi.SSID(i).c_str();
         rssiArray[i]=WiFi.RSSI(i);
     } 
     for(int i = 0; i < n-1; i++)
@@ -211,21 +224,22 @@ void calibration(void *pvParameters)
     TaskHandle_t phCalTaskHandle = NULL;
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, &phCalTaskHandle);
     delay(1000);
-    String strPH = "When PH Value stabalises, press the MID button.\nPH: ";
+    char strPH[100];
+    strcpy(strPH,"When PH Value stabalises, press the MID button.\nPH: ");
     lv_obj_add_state(ui_beginCalButton, LV_STATE_DISABLED);
     lv_obj_clear_state(ui_midPointCalButton,LV_STATE_DISABLED);
-    char phCalLabelBuffTemp[62];
+    char phCalLabelBuffTemp[100];
     while (!midCal)
     {
-        for(int i = 0;i<strPH.length();i++)
+        for(int i = 0;i<sizeof(strPH);i++)
         {
             phCalLabelBuffTemp[i]=strPH[i];
         }
         for(int i = 0;i<7;i++)
         {
-            phCalLabelBuffTemp[i+strPH.length()]=phBuffer[i];
+            phCalLabelBuffTemp[i+sizeof(strPH)]=phBuffer[i];
         }
-        strncpy(phCalLabelBuff,phCalLabelBuffTemp,60);
+        strncpy(phCalLabelBuff,phCalLabelBuffTemp,sizeof(phCalLabelBuff));
     }
     phSenseActive = false; //Setting this false will delete the task
     while (eTaskGetState(phCalTaskHandle) != eDeleted) //wait for task to be deleted
@@ -235,20 +249,21 @@ void calibration(void *pvParameters)
     phSenseActive = true;
     sendPHCode("Cal,mid,7.00\r"); //Do the midpoint calibration
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, &phCalTaskHandle);
-    strPH = "When PH Value stabalises, press the LOW button.\nPH: ";
+    memcpy(strPH,strclear,sizeof(strPH));
+    strcat(strPH,"When PH Value stabalises, press the LOW button.\nPH: ");
     lv_obj_clear_state(ui_lowPointCalButton,LV_STATE_DISABLED);
     lv_obj_add_state(ui_midPointCalButton, LV_STATE_DISABLED);
     while (!lowCal)
     {
-        for(int i = 0;i<strPH.length();i++)
+        for(int i = 0;i<sizeof(strPH);i++)
         {
             phCalLabelBuffTemp[i]=strPH[i];
         }
         for(int i = 0;i<7;i++)
         {
-            phCalLabelBuffTemp[i+strPH.length()]=phBuffer[i];
+            phCalLabelBuffTemp[i+sizeof(strPH)]=phBuffer[i];
         }
-        strncpy(phCalLabelBuff,phCalLabelBuffTemp,60);
+        strncpy(phCalLabelBuff,phCalLabelBuffTemp,64);
     }
     phSenseActive = false; //Setting this false will delete the task
     while (eTaskGetState(phCalTaskHandle) != eDeleted) //wait for task to be deleted
@@ -258,20 +273,21 @@ void calibration(void *pvParameters)
     phSenseActive = true;
     sendPHCode("Cal,low,4.00\r"); //Do the lowpoint calibration
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, &phCalTaskHandle);
-    strPH = "When PH Value stabalises, press the HIGH button.\nPH: ";
+    memcpy(strPH,strclear,sizeof(strPH));
+    strcat(strPH,"When PH Value stabalises, press the HIGH button.\nPH: ");
     lv_obj_clear_state(ui_highPointCalButton,LV_STATE_DISABLED);
     lv_obj_add_state(ui_lowPointCalButton, LV_STATE_DISABLED);
     while (!highCal)
     {
-        for(int i = 0;i<strPH.length();i++)
+        for(int i = 0;i<sizeof(strPH);i++)
         {
             phCalLabelBuffTemp[i]=strPH[i];
         }
         for(int i = 0;i<7;i++)
         {
-            phCalLabelBuffTemp[i+strPH.length()]=phBuffer[i];
+            phCalLabelBuffTemp[i+sizeof(strPH)]=phBuffer[i];
         }
-        strncpy(phCalLabelBuff,phCalLabelBuffTemp,60);
+        strncpy(phCalLabelBuff,phCalLabelBuffTemp,64);
     }
     phSenseActive = false; //Setting this false will delete the task
     while (eTaskGetState(phCalTaskHandle) != eDeleted) //wait for task to be deleted
@@ -311,9 +327,9 @@ void tempSenseGetVal(void *pvParameters)
         {
             tempVal = tempVal *1.800 + 32;
         }
-        String degString = "\xB0";
-        int ret = snprintf(tempBuffer, 6, "%f", tempVal);
-        tempBuffer[6] = degString.c_str()[0];
+        //char * degString = "\xB0";
+        snprintf(tempBuffer, 6, "%f", tempVal);
+        //tempBuffer[6] = degString[0];
         //Serial.println(buffer);
         if(samplingInterval > 110)
         {
@@ -381,6 +397,7 @@ void loadData(lv_event_t * e)
             File settingsFile = SPIFFS.open("/settings.txt");
             if(settingsFile)
             {
+                /*
                 int sizeOfSettings = settingsFile.size();
                 int countRow = 0;
                 int countCol = 0;
@@ -417,6 +434,25 @@ void loadData(lv_event_t * e)
                         settingsDoubleArray[countRow][i]=settingsCharArray[i];
                     }
                 }
+                for(int i = 0; i < countRow; i++)
+                {
+                    int indexOfSpace = 0;
+                    for(int n = 0; n< sizeof(settingsDoubleArray[i]);i++)
+                    {
+                        if(settingsDoubleArray[i][n] == ' ')
+                        {
+                            indexOfSpace = n;
+                        }
+                    }
+                    char compareBuff[indexOfSpace];
+                    char settingValBuff[sizeof(settingsDoubleArray[i])-indexOfSpace];
+                    memcpy(compareBuff,settingsDoubleArray[i],indexOfSpace);
+                    if(strcmp(compareBuff,"SampleingInt"))
+                    {
+
+                    }
+                    
+                }*/
             }
             else
             {
@@ -553,43 +589,51 @@ void beginCal(lv_event_t * e)
 void wifiTestTask(void *pvParameters)
 {
     char ssidCharArray[64];
-    lv_dropdown_get_selected_str(ui_wifiChooserDropdown,ssidCharArray,64);
-    WIFI_SSID = String(ssidCharArray);
-    WIFI_PASSWORD = lv_textarea_get_text(ui_passwordTextArea);
+    lv_dropdown_get_selected_str(ui_wifiChooserDropdown,ssidCharArray,sizeof(ssidCharArray));
+    strncpy(WIFI_SSID,ssidCharArray,sizeof(WIFI_SSID));
+    char passwordText[64];
+    memcpy(passwordText,lv_textarea_get_text(ui_passwordTextArea),sizeof(passwordText));
+    memcpy(WIFI_PASSWORD,passwordText,sizeof(WIFI_PASSWORD));
     WiFi.mode(WIFI_STA);
-    String wifiTestLabelString = "";
+    char wifiTestLabelString[64];
+    char clearWifiString[64];
     WiFi.begin(WIFI_SSID,WIFI_PASSWORD);
-    Serial.print("Trying to connect to: "+ WIFI_SSID);
-    wifiTestLabelString = "Trying to connect to: "+ WIFI_SSID;
-    wifiTestLabel = wifiTestLabelString.c_str();
+    Serial.print("Trying to connect to: ");
+    Serial.print(WIFI_SSID);
+    strcat(wifiTestLabelString, "Trying to connect to: ");
+    strcat(wifiTestLabelString, WIFI_SSID);
+    memcpy(wifiTestLabel,wifiTestLabelString,sizeof(wifiTestLabel));
     int c = 0;
     while(WiFi.status() != WL_CONNECTED and c < 20)
     {
         Serial.print(".");
         if( c%5 == 0)
         {
-            wifiTestLabelString = "Trying to connect to: "+ WIFI_SSID;
+            memcpy(wifiTestLabelString,clearWifiString,sizeof(wifiTestLabelString));
+            strcat(wifiTestLabelString,"Trying to connect to: ");
+            strcat(wifiTestLabelString,WIFI_SSID);
         }
         else
         {
-            wifiTestLabelString = wifiTestLabelString + ".";
+            strcat(wifiTestLabelString,".");
         }
-        wifiTestLabel = wifiTestLabelString.c_str();
+        memcpy(wifiTestLabel,wifiTestLabelString,sizeof(wifiTestLabel));
         c++;
         delay(1000);
     }
     Serial.println("");
+    memcpy(wifiTestLabelString,clearWifiString,sizeof(wifiTestLabelString));
     if(WiFi.status() == WL_CONNECTED)
     {
         Serial.print("Connection success, closing connection");
-        wifiTestLabelString = "Connection succesful, WIFI configuration saved.";
+        strcat(wifiTestLabelString,"Connection succesful, WIFI configuration saved.");
     }
     else
     {
-        wifiTestLabelString = "Connection unsuccessful turning off wifi.";
+        strcat(wifiTestLabelString,"Connection unsuccessful turning off wifi.");
     }
     Serial.println(wifiTestLabelString);
-    wifiTestLabel = wifiTestLabelString.c_str();
+    memcpy(wifiTestLabel,wifiTestLabelString,sizeof(wifiTestLabel));
     delay(3000);
     closeWifiServer();
     _ui_screen_change(&ui_EntranceScreen, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_EntranceScreen_screen_init);
