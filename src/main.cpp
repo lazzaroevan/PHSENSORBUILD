@@ -50,8 +50,6 @@ boolean input_string_complete = false;                //have we received all the
 boolean sensor_string_complete = false;               //have we received all the data from the Atlas Scientific product
 char strclear[100];
 
-
-
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
   inputstring = Serial.readStringUntil(13).c_str();                                      //read the string until we see a <CR>
@@ -277,10 +275,6 @@ void loop()
     lv_timer_handler();
 }
 
-void loadDataButtonEvent(lv_event_t * e)
-{
-    loadData();
-}
 void loadData()
 {
     Serial.println("Loading Data...");
@@ -370,11 +364,11 @@ void loadData()
     xTaskCreate(tempSenseGetVal, "tempSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
-
-void updateTempUnitsSwitchEvent(lv_event_t * e)
+void loadDataButtonEvent(lv_event_t * e)
 {
-    updateTempUnits();
+    loadData();
 }
+
 void updateTempUnits()
 {
     curUnitCelcius = lv_obj_has_state(ui_tempUnitsSwitch, LV_STATE_CHECKED);
@@ -388,11 +382,11 @@ void updateTempUnits()
     }
     Serial.println("Success!");
 }
-
-void setPlotTimePeriodDropdownEvent(lv_event_t * e)
+void updateTempUnitsSwitchEvent(lv_event_t * e)
 {
-	setPlotTimePeriod(lv_dropdown_get_selected(ui_plotTimePeriodDropdown));
+    updateTempUnits();
 }
+
 void setPlotTimePeriod(int valSel)
 {
 	Serial.println("Setting Plot Time Period...");
@@ -421,11 +415,11 @@ void setPlotTimePeriod(int valSel)
     }
     Serial.println("Success!");
 }
-
-void setSamplingIntervalDropdownEvent(lv_event_t * e)
+void setPlotTimePeriodDropdownEvent(lv_event_t * e)
 {
-	setSamplingInterval(lv_dropdown_get_selected(ui_samplingIntervalDropdown));
+	setPlotTimePeriod(lv_dropdown_get_selected(ui_plotTimePeriodDropdown));
 }
+
 void setSamplingInterval(int valSel)
 {
 	Serial.println("Setting Sampling Interval...");
@@ -456,11 +450,11 @@ void setSamplingInterval(int valSel)
     }
     Serial.println("Success!");
 }
-
-void wifiScanButtonEvent(lv_event_t * e)
+void setSamplingIntervalDropdownEvent(lv_event_t * e)
 {
-    xTaskCreate(wifiScan, "wifiScan", 20000, NULL, tskIDLE_PRIORITY, NULL);
+	setSamplingInterval(lv_dropdown_get_selected(ui_samplingIntervalDropdown));
 }
+
 void wifiScan(void *pvParameters)
 {
 	WiFi.mode(WIFI_STA);
@@ -510,11 +504,11 @@ void wifiScan(void *pvParameters)
     lv_dropdown_set_options(ui_wifiChooserDropdown,ssids.c_str());
     vTaskDelete(NULL);
 }
-
-void closeWifiServerButtonEvent(lv_event_t * e)
+void wifiScanButtonEvent(lv_event_t * e)
 {
-	closeWifiServer();
+    xTaskCreate(wifiScan, "wifiScan", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
+
 void closeWifiServer()
 {
     WiFi.mode(WIFI_MODE_STA);
@@ -523,12 +517,11 @@ void closeWifiServer()
     WiFi.mode(WIFI_OFF);    // Switch WiFi off
     Serial.println("Success!");
 }
-
-void startWifiApPageButtonEvent(lv_event_t * e)
+void closeWifiServerButtonEvent(lv_event_t * e)
 {
-	wifiServerUp = true;
-    xTaskCreate(wifiAPLoop, "wifiAPLoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
+	closeWifiServer();
 }
+
 void wifiAPLoop(void *pvParameters)
 {
     Serial.println("Starting Server....");
@@ -548,12 +541,12 @@ void wifiAPLoop(void *pvParameters)
     Serial.println("Closing Access Point....");
     vTaskDelete(NULL);
 }
-
-void startWifiStaPageButtonEvent(lv_event_t * e)
+void startWifiApPageButtonEvent(lv_event_t * e)
 {
 	wifiServerUp = true;
-    xTaskCreate(wifiSTALoop, "wifiSTALoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
+    xTaskCreate(wifiAPLoop, "wifiAPLoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
 }
+
 void wifiSTALoop(void *pvParameters)
 {
     Serial.println("Starting Server....");
@@ -575,47 +568,48 @@ void wifiSTALoop(void *pvParameters)
     
     vTaskDelete(NULL);
 }
-
-void highPointCalButtonEvent(lv_event_t * e)
+void startWifiStaPageButtonEvent(lv_event_t * e)
 {
-	highPointCal();
+	wifiServerUp = true;
+    xTaskCreate(wifiSTALoop, "wifiSTALoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
 }
+
 void highPointCal()
 {
 	highCal = true;
 }
-
-void lowPointCalButtonEvent(lv_event_t * e)
+void highPointCalButtonEvent(lv_event_t * e)
 {
-	lowPointCal();
+	highPointCal();
 }
+
 void lowPointCal()
 {
 	lowCal = true;
 }
-
-void midPointCalButtonEvent(lv_event_t * e)
+void lowPointCalButtonEvent(lv_event_t * e)
 {
-	midPointCal();
+	lowPointCal();
 }
+
 void midPointCal()
 {
 	midCal = true;
 }
-
-void beginCalButtonEvent(lv_event_t * e)
+void midPointCalButtonEvent(lv_event_t * e)
 {
-	beginCal();
+	midPointCal();
 }
+
 void beginCal()
 {
 	xTaskCreate(calibration, "calibration", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
-
-void wifiTestButtonEvent(lv_event_t * e)
+void beginCalButtonEvent(lv_event_t * e)
 {
-	xTaskCreate(wifiTestTask, "testWifi", 20000, NULL, tskIDLE_PRIORITY, NULL);
+	beginCal();
 }
+
 void wifiTestTask(void *pvParameters)
 {
     char ssidCharArray[64];
@@ -669,39 +663,43 @@ void wifiTestTask(void *pvParameters)
     _ui_screen_change(&ui_EntranceScreen, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_EntranceScreen_screen_init);
     vTaskDelete(NULL);
 }
-
-void resetDeviceButtonEvent(lv_event_t * e)
+void wifiTestButtonEvent(lv_event_t * e)
 {
-	resetDevice();
+	xTaskCreate(wifiTestTask, "testWifi", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
+
 void resetDevice()
 {
     esp_restart();
 }
-
-void screenOffButtonEvent(lv_event_t * e)
+void resetDeviceButtonEvent(lv_event_t * e)
 {
-	screenOff();
+	resetDevice();
 }
+
 void screenOff()
 {
 
 }
-
-void startBluetoothButtonEvent(lv_event_t * e)
+void screenOffButtonEvent(lv_event_t * e)
 {
-	startBluetooth();
+	screenOff();
 }
+
 void startBluetooth()
 {
 	// Your code here
 }
-
-void closeBluetoothButtonEvent(lv_event_t * e)
+void startBluetoothButtonEvent(lv_event_t * e)
 {
-	closeBluetooth();
+	startBluetooth();
 }
+
 void closeBluetooth()
 {
 	// Your code here
+}
+void closeBluetoothButtonEvent(lv_event_t * e)
+{
+	closeBluetooth();
 }
