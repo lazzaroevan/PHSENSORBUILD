@@ -150,7 +150,6 @@ void phSenseGetVal(void *pvParameters)
             }
             if (sensor_string_complete == true) 
             {               //if a string from the Atlas Scientific product has been received in its entirety
-                Serial.println(sensorstring);                    //send that string to the PC's serial monitor
                 phVal = sensorstring.toFloat();
                 int ret = snprintf(phBuffer, 6, "%f", phVal);
                 sensorstring = "";                                //clear the string
