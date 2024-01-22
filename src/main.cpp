@@ -49,6 +49,10 @@ const char * inputstring;                              //a string to hold incomi
 boolean input_string_complete = false;                //have we received all the data from the PC
 boolean sensor_string_complete = false;               //have we received all the data from the Atlas Scientific product
 char strclear[100];
+lv_chart_series_t * chartTempVals;
+lv_chart_series_t * chartPHVals;
+
+
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
@@ -99,6 +103,7 @@ void phSenseGetVal(void *pvParameters)
             if (sensor_string_complete == true) 
             {               //if a string from the Atlas Scientific product has been received in its entirety
                 phVal = sensorstring.toFloat();
+                lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal);
                 int ret = snprintf(phBuffer, 6, "%f", phVal);
                 sensorstring = "";                                //clear the string
             }
@@ -214,6 +219,7 @@ void tempSenseGetVal(void *pvParameters)
         //Serial.print("Temperature for Device 1 is: ");
         //Serial.print(sensors.getTempCByIndex(0));
         tempVal = sensors.getTempCByIndex(0);
+        lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal*1.800 + 32);
         celciusTemp = tempVal;
         if(!curUnitCelcius)
         {
@@ -256,6 +262,11 @@ void setup()
     buttCount = 0;
     //lv_obj_set_style_max_width();
     lv_obj_set_width(lv_dropdown_get_list(ui_wifiChooserDropdown), 260);
+
+    chartTempVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0xd40c0c),LV_CHART_AXIS_SECONDARY_Y);
+    chartPHVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0x1f9926),LV_CHART_AXIS_PRIMARY_Y);
+    lv_obj_set_style_size(ui_pHTempChart, 0, LV_PART_INDICATOR);
+
 }
 
 void loop()
@@ -271,6 +282,23 @@ void loop()
         lv_label_set_text(ui_ipLabelStaMode, ipCharArray);
         lv_label_set_text(ui_pHValLabel,phBuffer);
         lv_label_set_text(ui_wifiTestLabel,wifiTestLabel);
+        lv_chart_refresh(ui_pHTempChart);     
+    }
+    if(lv_obj_has_state(ui_showPHButton, LV_STATE_CHECKED))
+    {
+        lv_chart_hide_series(ui_pHTempChart, chartPHVals, true);
+    }
+    else
+    {
+        lv_chart_hide_series(ui_pHTempChart, chartPHVals, false);
+    }
+    if(lv_obj_has_state(ui_showTempButton, LV_STATE_CHECKED))
+    {
+        lv_chart_hide_series(ui_pHTempChart, chartTempVals, true);
+    }
+    else
+    {
+        lv_chart_hide_series(ui_pHTempChart, chartTempVals, false);
     }
     lv_timer_handler();
 }

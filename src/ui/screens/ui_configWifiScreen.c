@@ -96,7 +96,6 @@ void ui_configWifiScreen_screen_init(void)
     lv_obj_add_event_cb(ui_passwordTextArea, ui_event_passwordTextArea, LV_EVENT_ALL, NULL);
     lv_keyboard_set_textarea(ui_Keyboard, ui_passwordTextArea);
     lv_obj_add_event_cb(ui_Keyboard, ui_event_Keyboard, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_wifiTestButtonLabel, ui_event_wifiTestButtonLabel, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_setWifiInfoButton, ui_event_setWifiInfoButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_RefreshScan, ui_event_RefreshScan, LV_EVENT_ALL, NULL);
 

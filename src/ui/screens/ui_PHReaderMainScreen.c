@@ -64,16 +64,12 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_obj_set_style_bg_opa(ui_tempUnitsSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     ui_Panel1 = lv_obj_create(ui_pHReader);
-    lv_obj_set_width(ui_Panel1, 290);
+    lv_obj_set_width(ui_Panel1, 308);
     lv_obj_set_height(ui_Panel1, 105);
     lv_obj_set_x(ui_Panel1, 0);
-    lv_obj_set_y(ui_Panel1, 6);
+    lv_obj_set_y(ui_Panel1, 7);
     lv_obj_set_align(ui_Panel1, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_Panel1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_Panel1, lv_color_hex(0x3A3A3A), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Panel1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_blend_mode(ui_Panel1, LV_BLEND_MODE_NORMAL, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_opa(ui_Panel1, 200, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_tempStaticLabel = lv_label_create(ui_Panel1);
     lv_obj_set_width(ui_tempStaticLabel, LV_SIZE_CONTENT);   /// 1
@@ -113,9 +109,9 @@ void ui_PHReaderMainScreen_screen_init(void)
 
     ui_ReturnToHomeButton = lv_btn_create(ui_pHReader);
     lv_obj_set_width(ui_ReturnToHomeButton, 150);
-    lv_obj_set_height(ui_ReturnToHomeButton, 35);
+    lv_obj_set_height(ui_ReturnToHomeButton, 47);
     lv_obj_set_x(ui_ReturnToHomeButton, 79);
-    lv_obj_set_y(ui_ReturnToHomeButton, -71);
+    lv_obj_set_y(ui_ReturnToHomeButton, -74);
     lv_obj_set_align(ui_ReturnToHomeButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_ReturnToHomeButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_ReturnToHomeButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -130,9 +126,9 @@ void ui_PHReaderMainScreen_screen_init(void)
 
     ui_TurnOffScreenButton = lv_btn_create(ui_pHReader);
     lv_obj_set_width(ui_TurnOffScreenButton, 150);
-    lv_obj_set_height(ui_TurnOffScreenButton, 35);
+    lv_obj_set_height(ui_TurnOffScreenButton, 47);
     lv_obj_set_x(ui_TurnOffScreenButton, -79);
-    lv_obj_set_y(ui_TurnOffScreenButton, -71);
+    lv_obj_set_y(ui_TurnOffScreenButton, -74);
     lv_obj_set_align(ui_TurnOffScreenButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_TurnOffScreenButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_TurnOffScreenButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -143,59 +139,61 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_obj_set_align(ui_Label4, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label4, "Turn Off Screen");
 
-    ui_chartTabPage = lv_tabview_add_tab(ui_mainTabView, "Plots");
+    ui_chartTabPage = lv_tabview_add_tab(ui_mainTabView, "Plot");
     lv_obj_clear_flag(ui_chartTabPage, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
 
-    ui_chartTabView = lv_tabview_create(ui_chartTabPage, LV_DIR_TOP, 35);
-    lv_obj_set_width(ui_chartTabView, 315);
-    lv_obj_set_height(ui_chartTabView, 195);
-    lv_obj_set_x(ui_chartTabView, 1);
-    lv_obj_set_y(ui_chartTabView, 2);
-    lv_obj_set_align(ui_chartTabView, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_chartTabView, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-
-
-    ui_pHChartTabPage = lv_tabview_add_tab(ui_chartTabView, "PH");
-    lv_obj_clear_flag(ui_pHChartTabPage, LV_OBJ_FLAG_SCROLL_CHAIN);      /// Flags
-
-    ui_pHChart = lv_chart_create(ui_pHChartTabPage);
-    lv_obj_set_width(ui_pHChart, 240);
-    lv_obj_set_height(ui_pHChart, 123);
-    lv_obj_set_x(ui_pHChart, 0);
-    lv_obj_set_y(ui_pHChart, -9);
-    lv_obj_set_align(ui_pHChart, LV_ALIGN_CENTER);
-    lv_chart_set_type(ui_pHChart, LV_CHART_TYPE_LINE);
-    lv_chart_set_axis_tick(ui_pHChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_pHChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_pHChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 5, 2, true, 25);
-    lv_chart_series_t * ui_pHChart_series_1 = lv_chart_add_series(ui_pHChart, lv_color_hex(0x1EED2A),
-                                                                  LV_CHART_AXIS_PRIMARY_Y);
-    static lv_coord_t ui_pHChart_series_1_array[] = { 0, 10, 20, 40, 80, 80, 40, 20, 10, 0 };
-    lv_chart_set_ext_y_array(ui_pHChart, ui_pHChart_series_1, ui_pHChart_series_1_array);
+    ui_pHTempChart = lv_chart_create(ui_chartTabPage);
+    lv_obj_set_width(ui_pHTempChart, 242);
+    lv_obj_set_height(ui_pHTempChart, 173);
+    lv_obj_set_x(ui_pHTempChart, 0);
+    lv_obj_set_y(ui_pHTempChart, -12);
+    lv_obj_set_align(ui_pHTempChart, LV_ALIGN_CENTER);
+    lv_chart_set_type(ui_pHTempChart, LV_CHART_TYPE_LINE);
+    lv_chart_set_point_count(ui_pHTempChart, 15);
+    lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 0, 14);
+    lv_chart_set_div_line_count(ui_pHTempChart, 15, 13);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 7, 2, true, 50);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 3, 7, true, 50);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 8, 2, true, 25);
 
 
 
-    ui_tempChartTabPage = lv_tabview_add_tab(ui_chartTabView, "Temp");
-    lv_obj_clear_flag(ui_tempChartTabPage, LV_OBJ_FLAG_SCROLL_CHAIN);      /// Flags
+    ui_showPHButton = lv_btn_create(ui_chartTabPage);
+    lv_obj_set_width(ui_showPHButton, 40);
+    lv_obj_set_height(ui_showPHButton, 32);
+    lv_obj_set_x(ui_showPHButton, -140);
+    lv_obj_set_y(ui_showPHButton, 87);
+    lv_obj_set_align(ui_showPHButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_showPHButton, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_showPHButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_showPHButton, lv_color_hex(0x1F9926), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_showPHButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_tempChart = lv_chart_create(ui_tempChartTabPage);
-    lv_obj_set_width(ui_tempChart, 240);
-    lv_obj_set_height(ui_tempChart, 123);
-    lv_obj_set_x(ui_tempChart, 0);
-    lv_obj_set_y(ui_tempChart, -9);
-    lv_obj_set_align(ui_tempChart, LV_ALIGN_CENTER);
-    lv_chart_set_type(ui_tempChart, LV_CHART_TYPE_LINE);
-    lv_chart_set_div_line_count(ui_tempChart, 9, 9);
-    lv_chart_set_axis_tick(ui_tempChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_tempChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 5, 2, true, 50);
-    lv_chart_set_axis_tick(ui_tempChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 5, 2, true, 25);
-    lv_chart_series_t * ui_tempChart_series_1 = lv_chart_add_series(ui_tempChart, lv_color_hex(0xDC2121),
-                                                                    LV_CHART_AXIS_PRIMARY_Y);
-    static lv_coord_t ui_tempChart_series_1_array[] = { 0, 10, 20, 40, 80, 80, 40, 20, 10, 0 };
-    lv_chart_set_ext_y_array(ui_tempChart, ui_tempChart_series_1, ui_tempChart_series_1_array);
+    ui_Label10 = lv_label_create(ui_showPHButton);
+    lv_obj_set_width(ui_Label10, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label10, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label10, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label10, "PH");
+    lv_obj_set_style_text_font(ui_Label10, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_showTempButton = lv_btn_create(ui_chartTabPage);
+    lv_obj_set_width(ui_showTempButton, 40);
+    lv_obj_set_height(ui_showTempButton, 32);
+    lv_obj_set_x(ui_showTempButton, 140);
+    lv_obj_set_y(ui_showTempButton, 87);
+    lv_obj_set_align(ui_showTempButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_showTempButton, LV_OBJ_FLAG_CHECKABLE | LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_showTempButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_showTempButton, lv_color_hex(0xD40C0C), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_showTempButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Label13 = lv_label_create(ui_showTempButton);
+    lv_obj_set_width(ui_Label13, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label13, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label13, "Temp");
+    lv_obj_set_style_text_font(ui_Label13, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_settingsTabPage = lv_tabview_add_tab(ui_mainTabView, "Settings");
     lv_obj_clear_flag(ui_settingsTabPage,

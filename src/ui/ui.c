@@ -53,7 +53,6 @@ void ui_event_Keyboard(lv_event_t * e);
 lv_obj_t * ui_Keyboard;
 void ui_event_setWifiInfoButton(lv_event_t * e);
 lv_obj_t * ui_setWifiInfoButton;
-void ui_event_wifiTestButtonLabel(lv_event_t * e);
 lv_obj_t * ui_wifiTestButtonLabel;
 lv_obj_t * ui_wifiChooserDropdown;
 void ui_event_RefreshScan(lv_event_t * e);
@@ -82,11 +81,11 @@ void ui_event_TurnOffScreenButton(lv_event_t * e);
 lv_obj_t * ui_TurnOffScreenButton;
 lv_obj_t * ui_Label4;
 lv_obj_t * ui_chartTabPage;
-lv_obj_t * ui_chartTabView;
-lv_obj_t * ui_pHChartTabPage;
-lv_obj_t * ui_pHChart;
-lv_obj_t * ui_tempChartTabPage;
-lv_obj_t * ui_tempChart;
+lv_obj_t * ui_pHTempChart;
+lv_obj_t * ui_showPHButton;
+lv_obj_t * ui_Label10;
+lv_obj_t * ui_showTempButton;
+lv_obj_t * ui_Label13;
 lv_obj_t * ui_settingsTabPage;
 void ui_event_startWebpageButton(lv_event_t * e);
 lv_obj_t * ui_startWebpageButton;
@@ -277,15 +276,6 @@ void ui_event_setWifiInfoButton(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_wifiTestScreen, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_wifiTestScreen_screen_init);
         wifiTestButtonEvent(e);
-    }
-}
-void ui_event_wifiTestButtonLabel(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_wifiTestScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_wifiTestScreen_screen_init);
-        wifiTest(e);
     }
 }
 void ui_event_RefreshScan(lv_event_t * e)

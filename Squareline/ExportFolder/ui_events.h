@@ -17,7 +17,6 @@ void lowPointCalButtonEvent(lv_event_t * e);
 void midPointCalButtonEvent(lv_event_t * e);
 void beginCalButtonEvent(lv_event_t * e);
 void wifiTestButtonEvent(lv_event_t * e);
-void wifiTest(lv_event_t * e);
 void updateTempUnitsSwitchEvent(lv_event_t * e);
 void resetDeviceButtonEvent(lv_event_t * e);
 void screenOffButtonEvent(lv_event_t * e);
