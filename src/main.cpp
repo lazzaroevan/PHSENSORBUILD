@@ -51,14 +51,6 @@ boolean sensor_string_complete = false;               //have we received all the
 char strclear[100];
 
 
-void closeWifiServer()
-{
-    WiFi.mode(WIFI_MODE_STA);
-    wifiServerUp = false;
-    WiFi.disconnect(true);  // Disconnect from the network
-    WiFi.mode(WIFI_OFF);    // Switch WiFi off
-    Serial.println("Success!");
-}
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
@@ -76,48 +68,6 @@ void sendPHCode(String code)
     Serial2.print(code);
     Serial2.end();
     delay(100);
-}
-
-void wifiAPLoop(void *pvParameters)
-{
-    Serial.println("Starting Server....");
-    char connectingString[64];
-    strcat(connectingString,"Creating access point....");
-    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
-    char tempIPString[64];
-    strcat(tempIPString,"Connect to the PHSENSOR WiFi and navigate to: \"");
-    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,true).c_str());
-    strcat(tempIPString, "\" in your browser.");
-    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
-    while(wifiServerUp)
-    {
-        serverLoop(celciusTemp,phVal);
-    }
-    Serial.println("Closing Server....");
-    Serial.println("Closing Access Point....");
-    vTaskDelete(NULL);
-}
-
-void wifiSTALoop(void *pvParameters)
-{
-    Serial.println("Starting Server....");
-    char connectingString[64];
-    strcat(connectingString,"Connecting to: ");
-    strcat(connectingString,WIFI_SSID);
-    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
-    char tempIPString[64] = "Connected to :";
-    strcat(tempIPString, WIFI_SSID);
-    strcat(tempIPString,". Navigate to: \"");
-    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,false).c_str());
-    strcat(tempIPString,"\" in your browser.");
-    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
-    while(wifiServerUp)
-    {
-        serverLoop(celciusTemp,phVal);
-    }
-    Serial.println("Closing Server....");
-    
-    vTaskDelete(NULL);
 }
 
 void phSenseGetVal(void *pvParameters)
@@ -160,61 +110,6 @@ void phSenseGetVal(void *pvParameters)
     Serial2.end();
     Serial.println("PHSENSE VTASK ENDING");
     vTaskDelete(NULL);
-}
-
-void wifiScan(void *pvParameters)
-{
-	WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    delay(100);
-    int n = WiFi.scanNetworks();
-    String ssids;
-    String ssidArray[n];
-    int32_t rssiArray[n];
-    int32_t tempInt;
-    int biggestIndex;
-    String tempString;
-    for(int i = 0; i < n; i++)
-    {
-        ssidArray[i]=WiFi.SSID(i).c_str();
-        rssiArray[i]=WiFi.RSSI(i);
-    } 
-    for(int i = 0; i < n-1; i++)
-    {
-        Serial.println(rssiArray[i]);
-        for(int c = i; c<n; c++)
-        {
-            if(rssiArray[i]<=rssiArray[c])
-            {
-                tempInt = rssiArray[i];
-                tempString = ssidArray[i];
-                rssiArray[i]=rssiArray[c];
-                ssidArray[i]=ssidArray[c];
-                rssiArray[c]=tempInt;
-                ssidArray[c]=tempString;
-            }
-        }
-    }
-    for(int i = n;i-->0;)
-    {
-        if(i == 0)
-        {
-            ssids += ssidArray[n-i-1];
-        }
-        else
-        {
-            ssids += ssidArray[n-i-1]+"\n";
-        }
-    }
-    Serial.println("Assigning SSIDs to dropdown");
-    Serial.println(ssids);
-    lv_dropdown_set_options(ui_wifiChooserDropdown,ssids.c_str());
-    vTaskDelete(NULL);
-}
-
-void wifiSearch(lv_event_t * e)
-{
-    xTaskCreate(wifiScan, "wifiScan", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
 
 void calibration(void *pvParameters)
@@ -382,7 +277,11 @@ void loop()
     lv_timer_handler();
 }
 
-void loadData(lv_event_t * e)
+void loadDataButtonEvent(lv_event_t * e)
+{
+    loadData();
+}
+void loadData()
 {
     Serial.println("Loading Data...");
     if(!SPIFFS.begin(true))
@@ -472,7 +371,11 @@ void loadData(lv_event_t * e)
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
 
-void updateTempUnits(lv_event_t * e)
+void updateTempUnitsSwitchEvent(lv_event_t * e)
+{
+    updateTempUnits();
+}
+void updateTempUnits()
 {
     curUnitCelcius = lv_obj_has_state(ui_tempUnitsSwitch, LV_STATE_CHECKED);
 	if(curUnitCelcius)
@@ -486,22 +389,13 @@ void updateTempUnits(lv_event_t * e)
     Serial.println("Success!");
 }
 
-void startWifiApPage(lv_event_t * e)
+void setPlotTimePeriodDropdownEvent(lv_event_t * e)
 {
-    wifiServerUp = true;
-    xTaskCreate(wifiAPLoop, "wifiAPLoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
+	setPlotTimePeriod(lv_dropdown_get_selected(ui_plotTimePeriodDropdown));
 }
-
-void startWifiStaPage(lv_event_t * e)
-{
-    wifiServerUp = true;
-    xTaskCreate(wifiSTALoop, "wifiSTALoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
-}
-
-void setPlotTimePeriod(lv_event_t * e)
+void setPlotTimePeriod(int valSel)
 {
 	Serial.println("Setting Plot Time Period...");
-    int valSel = lv_dropdown_get_selected(ui_plotTimePeriodDropdown);
     switch (valSel)
     {
         case 0:
@@ -528,10 +422,13 @@ void setPlotTimePeriod(lv_event_t * e)
     Serial.println("Success!");
 }
 
-void setSamplingInterval(lv_event_t * e)
+void setSamplingIntervalDropdownEvent(lv_event_t * e)
+{
+	setSamplingInterval(lv_dropdown_get_selected(ui_samplingIntervalDropdown));
+}
+void setSamplingInterval(int valSel)
 {
 	Serial.println("Setting Sampling Interval...");
-    int valSel = lv_dropdown_get_selected(ui_samplingIntervalDropdown);
     switch (valSel)
     {
         case 0:
@@ -560,31 +457,165 @@ void setSamplingInterval(lv_event_t * e)
     Serial.println("Success!");
 }
 
-void closeWifiServerEvent(lv_event_t * e)
+void wifiScanButtonEvent(lv_event_t * e)
 {
-    closeWifiServer();
+    xTaskCreate(wifiScan, "wifiScan", 20000, NULL, tskIDLE_PRIORITY, NULL);
+}
+void wifiScan(void *pvParameters)
+{
+	WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    int n = WiFi.scanNetworks();
+    String ssids;
+    String ssidArray[n];
+    int32_t rssiArray[n];
+    int32_t tempInt;
+    int biggestIndex;
+    String tempString;
+    for(int i = 0; i < n; i++)
+    {
+        ssidArray[i]=WiFi.SSID(i).c_str();
+        rssiArray[i]=WiFi.RSSI(i);
+    } 
+    for(int i = 0; i < n-1; i++)
+    {
+        Serial.println(rssiArray[i]);
+        for(int c = i; c<n; c++)
+        {
+            if(rssiArray[i]<=rssiArray[c])
+            {
+                tempInt = rssiArray[i];
+                tempString = ssidArray[i];
+                rssiArray[i]=rssiArray[c];
+                ssidArray[i]=ssidArray[c];
+                rssiArray[c]=tempInt;
+                ssidArray[c]=tempString;
+            }
+        }
+    }
+    for(int i = n;i-->0;)
+    {
+        if(i == 0)
+        {
+            ssids += ssidArray[n-i-1];
+        }
+        else
+        {
+            ssids += ssidArray[n-i-1]+"\n";
+        }
+    }
+    Serial.println("Assigning SSIDs to dropdown");
+    Serial.println(ssids);
+    lv_dropdown_set_options(ui_wifiChooserDropdown,ssids.c_str());
+    vTaskDelete(NULL);
 }
 
-void highPointCal(lv_event_t * e)
+void closeWifiServerButtonEvent(lv_event_t * e)
+{
+	closeWifiServer();
+}
+void closeWifiServer()
+{
+    WiFi.mode(WIFI_MODE_STA);
+    wifiServerUp = false;
+    WiFi.disconnect(true);  // Disconnect from the network
+    WiFi.mode(WIFI_OFF);    // Switch WiFi off
+    Serial.println("Success!");
+}
+
+void startWifiApPageButtonEvent(lv_event_t * e)
+{
+	wifiServerUp = true;
+    xTaskCreate(wifiAPLoop, "wifiAPLoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
+}
+void wifiAPLoop(void *pvParameters)
+{
+    Serial.println("Starting Server....");
+    char connectingString[64];
+    strcat(connectingString,"Creating access point....");
+    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
+    char tempIPString[64];
+    strcat(tempIPString,"Connect to the PHSENSOR WiFi and navigate to: \"");
+    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,true).c_str());
+    strcat(tempIPString, "\" in your browser.");
+    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
+    while(wifiServerUp)
+    {
+        serverLoop(celciusTemp,phVal);
+    }
+    Serial.println("Closing Server....");
+    Serial.println("Closing Access Point....");
+    vTaskDelete(NULL);
+}
+
+void startWifiStaPageButtonEvent(lv_event_t * e)
+{
+	wifiServerUp = true;
+    xTaskCreate(wifiSTALoop, "wifiSTALoop", 20000, NULL, tskIDLE_PRIORITY, &wifiAPTaskHandle);
+}
+void wifiSTALoop(void *pvParameters)
+{
+    Serial.println("Starting Server....");
+    char connectingString[64];
+    strcat(connectingString,"Connecting to: ");
+    strcat(connectingString,WIFI_SSID);
+    memcpy(ipCharArray,connectingString,sizeof(ipCharArray));
+    char tempIPString[64] = "Connected to :";
+    strcat(tempIPString, WIFI_SSID);
+    strcat(tempIPString,". Navigate to: \"");
+    strcat(tempIPString,serverSetup(WIFI_SSID,WIFI_PASSWORD,false).c_str());
+    strcat(tempIPString,"\" in your browser.");
+    memcpy(ipCharArray,tempIPString,sizeof(ipCharArray));
+    while(wifiServerUp)
+    {
+        serverLoop(celciusTemp,phVal);
+    }
+    Serial.println("Closing Server....");
+    
+    vTaskDelete(NULL);
+}
+
+void highPointCalButtonEvent(lv_event_t * e)
+{
+	highPointCal();
+}
+void highPointCal()
 {
 	highCal = true;
 }
 
-void lowPointCal(lv_event_t * e)
+void lowPointCalButtonEvent(lv_event_t * e)
+{
+	lowPointCal();
+}
+void lowPointCal()
 {
 	lowCal = true;
 }
 
-void midPointCal(lv_event_t * e)
+void midPointCalButtonEvent(lv_event_t * e)
+{
+	midPointCal();
+}
+void midPointCal()
 {
 	midCal = true;
 }
 
-void beginCal(lv_event_t * e)
+void beginCalButtonEvent(lv_event_t * e)
+{
+	beginCal();
+}
+void beginCal()
 {
 	xTaskCreate(calibration, "calibration", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
 
+void wifiTestButtonEvent(lv_event_t * e)
+{
+	xTaskCreate(wifiTestTask, "testWifi", 20000, NULL, tskIDLE_PRIORITY, NULL);
+}
 void wifiTestTask(void *pvParameters)
 {
     char ssidCharArray[64];
@@ -639,17 +670,38 @@ void wifiTestTask(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void wifiTest(lv_event_t * e)
+void resetDeviceButtonEvent(lv_event_t * e)
 {
-	xTaskCreate(wifiTestTask, "testWifi", 20000, NULL, tskIDLE_PRIORITY, NULL);
+	resetDevice();
+}
+void resetDevice()
+{
+    esp_restart();
 }
 
-void startBluetooth(lv_event_t * e)
+void screenOffButtonEvent(lv_event_t * e)
+{
+	screenOff();
+}
+void screenOff()
+{
+
+}
+
+void startBluetoothButtonEvent(lv_event_t * e)
+{
+	startBluetooth();
+}
+void startBluetooth()
 {
 	// Your code here
 }
 
-void closeBluetooth(lv_event_t * e)
+void closeBluetoothButtonEvent(lv_event_t * e)
+{
+	closeBluetooth();
+}
+void closeBluetooth()
 {
 	// Your code here
 }
