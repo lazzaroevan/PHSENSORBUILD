@@ -87,21 +87,35 @@ lv_obj_t * ui_Label10;
 lv_obj_t * ui_showTempButton;
 lv_obj_t * ui_Label13;
 lv_obj_t * ui_settingsTabPage;
-void ui_event_startWebpageButton(lv_event_t * e);
-lv_obj_t * ui_startWebpageButton;
-lv_obj_t * ui_startWiFiButtonLabel;
+lv_obj_t * ui_TabView1;
+lv_obj_t * ui_generalSettingsTabPage;
 void ui_event_plotTimePeriodDropdown(lv_event_t * e);
 lv_obj_t * ui_plotTimePeriodDropdown;
 lv_obj_t * ui_plotTimePeriodLabel;
 void ui_event_samplingIntervalDropdown(lv_event_t * e);
 lv_obj_t * ui_samplingIntervalDropdown;
 lv_obj_t * ui_samplingIntervalLabel;
-lv_obj_t * ui_warningLabel;
+lv_obj_t * ui_staticBatteryLabel;
+lv_obj_t * ui_UpdateBatteryLabel;
+lv_obj_t * ui_plotSettingsTabPage;
+void ui_event_TempSlider(lv_event_t * e);
+lv_obj_t * ui_TempSlider;
+void ui_event_PHSlider(lv_event_t * e);
+lv_obj_t * ui_PHSlider;
+lv_obj_t * ui_staticTempRangeLabel;
+lv_obj_t * ui_staticPHRangeLabel;
+lv_obj_t * ui_phRangeLiveLabel;
+lv_obj_t * ui_tempRangeLiveLabel;
+lv_obj_t * ui_wirelessControlSettingsTabPage;
 void ui_event_startBluetoothButton(lv_event_t * e);
 lv_obj_t * ui_startBluetoothButton;
 lv_obj_t * ui_startBluetoothButtonLabel;
-lv_obj_t * ui_Label7;
-lv_obj_t * ui_Label9;
+void ui_event_startWebpageButton(lv_event_t * e);
+lv_obj_t * ui_startWebpageButton;
+lv_obj_t * ui_startWiFiButtonLabel;
+void ui_event_configWifi2(lv_event_t * e);
+lv_obj_t * ui_configWifi2;
+lv_obj_t * ui_lblButton3;
 
 
 // SCREEN: ui_APorSTAScreen
@@ -311,14 +325,6 @@ void ui_event_TurnOffScreenButton(lv_event_t * e)
         screenOffButtonEvent(e);
     }
 }
-void ui_event_startWebpageButton(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_APorSTAScreen, LV_SCR_LOAD_ANIM_FADE_ON, 100, 0, &ui_APorSTAScreen_screen_init);
-    }
-}
 void ui_event_plotTimePeriodDropdown(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -335,6 +341,22 @@ void ui_event_samplingIntervalDropdown(lv_event_t * e)
         setSamplingIntervalDropdownEvent(e);
     }
 }
+void ui_event_TempSlider(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        changePHPlotValuesSliderEvent(e);
+    }
+}
+void ui_event_PHSlider(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        changeTempPlotValuesSliderEvent(e);
+    }
+}
 void ui_event_startBluetoothButton(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -342,6 +364,23 @@ void ui_event_startBluetoothButton(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         _ui_screen_change(&ui_bluetoothMode, LV_SCR_LOAD_ANIM_FADE_ON, 100, 0, &ui_bluetoothMode_screen_init);
         startBluetoothButtonEvent(e);
+    }
+}
+void ui_event_startWebpageButton(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_APorSTAScreen, LV_SCR_LOAD_ANIM_FADE_ON, 100, 0, &ui_APorSTAScreen_screen_init);
+    }
+}
+void ui_event_configWifi2(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_configWifiScreen, LV_SCR_LOAD_ANIM_FADE_ON, 200, 0, &ui_configWifiScreen_screen_init);
+        wifiScanButtonEvent(e);
     }
 }
 void ui_event_apMode(lv_event_t * e)

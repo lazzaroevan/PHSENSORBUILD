@@ -134,3 +134,11 @@ def resetDeviceButtonEvent(event_struct):
 def screenOffButtonEvent(event_struct):
     return
 
+
+def changePHPlotValuesSliderEvent(event_struct):
+    return
+
+
+def changeTempPlotValuesSliderEvent(event_struct):
+    return
+

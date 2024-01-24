@@ -49,16 +49,7 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_obj_set_align(ui_tempUnitsSwitch, LV_ALIGN_CENTER);
     lv_obj_set_style_bg_color(ui_tempUnitsSwitch, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_tempUnitsSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_tempUnitsSwitch, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui_tempUnitsSwitch, LV_GRAD_DIR_HOR, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_anim_time(ui_tempUnitsSwitch, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_bg_color(ui_tempUnitsSwitch, lv_color_hex(0xFFFFFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_tempUnitsSwitch, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_tempUnitsSwitch, lv_color_hex(0x008CFF), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_main_stop(ui_tempUnitsSwitch, 10, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_stop(ui_tempUnitsSwitch, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui_tempUnitsSwitch, LV_GRAD_DIR_HOR, LV_PART_INDICATOR | LV_STATE_DEFAULT);
 
     lv_obj_set_style_bg_color(ui_tempUnitsSwitch, lv_color_hex(0x000000), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_tempUnitsSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -200,28 +191,25 @@ void ui_PHReaderMainScreen_screen_init(void)
                       LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
 
-    ui_startWebpageButton = lv_btn_create(ui_settingsTabPage);
-    lv_obj_set_width(ui_startWebpageButton, 150);
-    lv_obj_set_height(ui_startWebpageButton, 40);
-    lv_obj_set_x(ui_startWebpageButton, 79);
-    lv_obj_set_y(ui_startWebpageButton, 31);
-    lv_obj_set_align(ui_startWebpageButton, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_startWebpageButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_startWebpageButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_TabView1 = lv_tabview_create(ui_settingsTabPage, LV_DIR_TOP, 35);
+    lv_obj_set_width(ui_TabView1, 320);
+    lv_obj_set_height(ui_TabView1, 200);
+    lv_obj_set_align(ui_TabView1, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_TabView1, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
+                      LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
 
-    ui_startWiFiButtonLabel = lv_label_create(ui_startWebpageButton);
-    lv_obj_set_width(ui_startWiFiButtonLabel, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_startWiFiButtonLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_startWiFiButtonLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_startWiFiButtonLabel, "Start Webpage");
-    lv_obj_set_style_text_font(ui_startWiFiButtonLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_plotTimePeriodDropdown = lv_dropdown_create(ui_settingsTabPage);
+    ui_generalSettingsTabPage = lv_tabview_add_tab(ui_TabView1, "General");
+    lv_obj_clear_flag(ui_generalSettingsTabPage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+
+    ui_plotTimePeriodDropdown = lv_dropdown_create(ui_generalSettingsTabPage);
     lv_dropdown_set_options(ui_plotTimePeriodDropdown, "1 Minute\n5 Minutes\n30 Minutes\n1 Hour\n2 Hours\n1 Day");
     lv_obj_set_width(ui_plotTimePeriodDropdown, 126);
     lv_obj_set_height(ui_plotTimePeriodDropdown, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_plotTimePeriodDropdown, 82);
-    lv_obj_set_y(ui_plotTimePeriodDropdown, -10);
+    lv_obj_set_x(ui_plotTimePeriodDropdown, 80);
+    lv_obj_set_y(ui_plotTimePeriodDropdown, 57);
     lv_obj_set_align(ui_plotTimePeriodDropdown, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_plotTimePeriodDropdown, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_plotTimePeriodDropdown, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -229,20 +217,20 @@ void ui_PHReaderMainScreen_screen_init(void)
 
 
 
-    ui_plotTimePeriodLabel = lv_label_create(ui_settingsTabPage);
+    ui_plotTimePeriodLabel = lv_label_create(ui_generalSettingsTabPage);
     lv_obj_set_width(ui_plotTimePeriodLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_plotTimePeriodLabel, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_plotTimePeriodLabel, -69);
-    lv_obj_set_y(ui_plotTimePeriodLabel, -10);
+    lv_obj_set_y(ui_plotTimePeriodLabel, 56);
     lv_obj_set_align(ui_plotTimePeriodLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_plotTimePeriodLabel, "Time Period For Plots:");
 
-    ui_samplingIntervalDropdown = lv_dropdown_create(ui_settingsTabPage);
+    ui_samplingIntervalDropdown = lv_dropdown_create(ui_generalSettingsTabPage);
     lv_dropdown_set_options(ui_samplingIntervalDropdown, ".1 Seconds\n.5 Seconds\n1 Second\n5 Seconds\n30 Seconds");
     lv_obj_set_width(ui_samplingIntervalDropdown, 126);
     lv_obj_set_height(ui_samplingIntervalDropdown, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_samplingIntervalDropdown, 82);
-    lv_obj_set_y(ui_samplingIntervalDropdown, -49);
+    lv_obj_set_x(ui_samplingIntervalDropdown, 80);
+    lv_obj_set_y(ui_samplingIntervalDropdown, 16);
     lv_obj_set_align(ui_samplingIntervalDropdown, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_samplingIntervalDropdown, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_samplingIntervalDropdown, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -250,31 +238,104 @@ void ui_PHReaderMainScreen_screen_init(void)
 
 
 
-    ui_samplingIntervalLabel = lv_label_create(ui_settingsTabPage);
+    ui_samplingIntervalLabel = lv_label_create(ui_generalSettingsTabPage);
     lv_obj_set_width(ui_samplingIntervalLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_samplingIntervalLabel, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_samplingIntervalLabel, -69);
-    lv_obj_set_y(ui_samplingIntervalLabel, -49);
+    lv_obj_set_y(ui_samplingIntervalLabel, 18);
     lv_obj_set_align(ui_samplingIntervalLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_samplingIntervalLabel, "PH Sampling Interval:");
 
-    ui_warningLabel = lv_label_create(ui_settingsTabPage);
-    lv_obj_set_width(ui_warningLabel, lv_pct(54));
-    lv_obj_set_height(ui_warningLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_warningLabel, -77);
-    lv_obj_set_y(ui_warningLabel, 53);
-    lv_obj_set_align(ui_warningLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_warningLabel,
-                      "Warning: Making any changes on this screen will result in all plot data being erased");
-    lv_obj_set_style_text_color(ui_warningLabel, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_warningLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_warningLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_staticBatteryLabel = lv_label_create(ui_generalSettingsTabPage);
+    lv_obj_set_width(ui_staticBatteryLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_staticBatteryLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_staticBatteryLabel, -43);
+    lv_obj_set_y(ui_staticBatteryLabel, -68);
+    lv_obj_set_align(ui_staticBatteryLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_staticBatteryLabel, "Battery Level, Time Remaining:");
+    lv_obj_set_style_border_color(ui_staticBatteryLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_staticBatteryLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_staticBatteryLabel, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_side(ui_staticBatteryLabel, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_startBluetoothButton = lv_btn_create(ui_settingsTabPage);
-    lv_obj_set_width(ui_startBluetoothButton, 150);
-    lv_obj_set_height(ui_startBluetoothButton, 40);
-    lv_obj_set_x(ui_startBluetoothButton, 79);
-    lv_obj_set_y(ui_startBluetoothButton, 75);
+    ui_UpdateBatteryLabel = lv_label_create(ui_generalSettingsTabPage);
+    lv_obj_set_width(ui_UpdateBatteryLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_UpdateBatteryLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_UpdateBatteryLabel, 111);
+    lv_obj_set_y(ui_UpdateBatteryLabel, -65);
+    lv_obj_set_align(ui_UpdateBatteryLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_UpdateBatteryLabel, "100%\n24:24:60");
+    lv_obj_set_style_text_align(ui_UpdateBatteryLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_UpdateBatteryLabel, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_plotSettingsTabPage = lv_tabview_add_tab(ui_TabView1, "Plot Settings");
+    lv_obj_clear_flag(ui_plotSettingsTabPage,
+                      LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+
+    ui_TempSlider = lv_slider_create(ui_plotSettingsTabPage);
+    lv_slider_set_mode(ui_TempSlider, LV_SLIDER_MODE_RANGE);
+    lv_slider_set_value(ui_TempSlider, 100, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_TempSlider) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_TempSlider, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_TempSlider, 280);
+    lv_obj_set_height(ui_TempSlider, 10);
+    lv_obj_set_x(ui_TempSlider, 0);
+    lv_obj_set_y(ui_TempSlider, -35);
+    lv_obj_set_align(ui_TempSlider, LV_ALIGN_CENTER);
+
+
+    ui_PHSlider = lv_slider_create(ui_plotSettingsTabPage);
+    lv_slider_set_range(ui_PHSlider, 0, 14);
+    lv_slider_set_mode(ui_PHSlider, LV_SLIDER_MODE_RANGE);
+    lv_slider_set_value(ui_PHSlider, 14, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_PHSlider) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_PHSlider, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_PHSlider, 280);
+    lv_obj_set_height(ui_PHSlider, 10);
+    lv_obj_set_x(ui_PHSlider, 0);
+    lv_obj_set_y(ui_PHSlider, 36);
+    lv_obj_set_align(ui_PHSlider, LV_ALIGN_CENTER);
+
+
+    ui_staticTempRangeLabel = lv_label_create(ui_plotSettingsTabPage);
+    lv_obj_set_width(ui_staticTempRangeLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_staticTempRangeLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_staticTempRangeLabel, -3);
+    lv_obj_set_y(ui_staticTempRangeLabel, -60);
+    lv_obj_set_align(ui_staticTempRangeLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_staticTempRangeLabel, "Tempature Range");
+
+    ui_staticPHRangeLabel = lv_label_create(ui_plotSettingsTabPage);
+    lv_obj_set_width(ui_staticPHRangeLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_staticPHRangeLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_staticPHRangeLabel, -4);
+    lv_obj_set_y(ui_staticPHRangeLabel, 12);
+    lv_obj_set_align(ui_staticPHRangeLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_staticPHRangeLabel, "PH Range");
+
+    ui_phRangeLiveLabel = lv_label_create(ui_plotSettingsTabPage);
+    lv_obj_set_width(ui_phRangeLiveLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_phRangeLiveLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_phRangeLiveLabel, 0);
+    lv_obj_set_y(ui_phRangeLiveLabel, 63);
+    lv_obj_set_align(ui_phRangeLiveLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_phRangeLiveLabel, "0");
+
+    ui_tempRangeLiveLabel = lv_label_create(ui_plotSettingsTabPage);
+    lv_obj_set_width(ui_tempRangeLiveLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_tempRangeLiveLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_tempRangeLiveLabel, 0);
+    lv_obj_set_y(ui_tempRangeLiveLabel, -12);
+    lv_obj_set_align(ui_tempRangeLiveLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_tempRangeLiveLabel, "0");
+
+    ui_wirelessControlSettingsTabPage = lv_tabview_add_tab(ui_TabView1, "Wireless");
+    lv_obj_clear_flag(ui_wirelessControlSettingsTabPage,
+                      LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
+                      LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+
+    ui_startBluetoothButton = lv_btn_create(ui_wirelessControlSettingsTabPage);
+    lv_obj_set_width(ui_startBluetoothButton, 300);
+    lv_obj_set_height(ui_startBluetoothButton, 45);
     lv_obj_set_align(ui_startBluetoothButton, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_startBluetoothButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_startBluetoothButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -286,34 +347,47 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_label_set_text(ui_startBluetoothButtonLabel, "Start Bluetooth");
     lv_obj_set_style_text_font(ui_startBluetoothButtonLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label7 = lv_label_create(ui_settingsTabPage);
-    lv_obj_set_width(ui_Label7, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label7, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label7, -35);
-    lv_obj_set_y(ui_Label7, -84);
-    lv_obj_set_align(ui_Label7, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label7, "Battery Level, Time Remaining:");
-    lv_obj_set_style_border_color(ui_Label7, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_Label7, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(ui_Label7, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_side(ui_Label7, LV_BORDER_SIDE_BOTTOM, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_startWebpageButton = lv_btn_create(ui_wirelessControlSettingsTabPage);
+    lv_obj_set_width(ui_startWebpageButton, 300);
+    lv_obj_set_height(ui_startWebpageButton, 45);
+    lv_obj_set_x(ui_startWebpageButton, 0);
+    lv_obj_set_y(ui_startWebpageButton, -52);
+    lv_obj_set_align(ui_startWebpageButton, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_startWebpageButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_startWebpageButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Label9 = lv_label_create(ui_settingsTabPage);
-    lv_obj_set_width(ui_Label9, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label9, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label9, 112);
-    lv_obj_set_y(ui_Label9, -84);
-    lv_obj_set_align(ui_Label9, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label9, "100%\n24:24:60");
-    lv_obj_set_style_text_align(ui_Label9, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label9, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_startWiFiButtonLabel = lv_label_create(ui_startWebpageButton);
+    lv_obj_set_width(ui_startWiFiButtonLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_startWiFiButtonLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_startWiFiButtonLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_startWiFiButtonLabel, "Start Webpage");
+    lv_obj_set_style_text_font(ui_startWiFiButtonLabel, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_configWifi2 = lv_btn_create(ui_wirelessControlSettingsTabPage);
+    lv_obj_set_width(ui_configWifi2, 300);
+    lv_obj_set_height(ui_configWifi2, 45);
+    lv_obj_set_x(ui_configWifi2, 0);
+    lv_obj_set_y(ui_configWifi2, 52);
+    lv_obj_set_align(ui_configWifi2, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_configWifi2, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_configWifi2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_lblButton3 = lv_label_create(ui_configWifi2);
+    lv_obj_set_width(ui_lblButton3, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_lblButton3, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_lblButton3, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_lblButton3, "Start WiFi Config");
+    lv_obj_set_style_text_font(ui_lblButton3, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_tempUnitsSwitch, ui_event_tempUnitsSwitch, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ReturnToHomeButton, ui_event_ReturnToHomeButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TurnOffScreenButton, ui_event_TurnOffScreenButton, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_startWebpageButton, ui_event_startWebpageButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_plotTimePeriodDropdown, ui_event_plotTimePeriodDropdown, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_samplingIntervalDropdown, ui_event_samplingIntervalDropdown, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_TempSlider, ui_event_TempSlider, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_PHSlider, ui_event_PHSlider, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_startBluetoothButton, ui_event_startBluetoothButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_startWebpageButton, ui_event_startWebpageButton, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_configWifi2, ui_event_configWifi2, LV_EVENT_ALL, NULL);
 
 }

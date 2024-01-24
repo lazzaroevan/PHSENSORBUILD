@@ -731,3 +731,13 @@ void closeBluetoothButtonEvent(lv_event_t * e)
 {
 	closeBluetooth();
 }
+
+void changePHPlotValuesSliderEvent(lv_event_t * e)
+{
+	// Your code here
+}
+
+void changeTempPlotValuesSliderEvent(lv_event_t * e)
+{
+	// Your code here
+}

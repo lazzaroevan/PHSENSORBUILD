@@ -22,6 +22,8 @@ void resetDeviceButtonEvent(lv_event_t * e);
 void screenOffButtonEvent(lv_event_t * e);
 void setPlotTimePeriodDropdownEvent(lv_event_t * e);
 void setSamplingIntervalDropdownEvent(lv_event_t * e);
+void changePHPlotValuesSliderEvent(lv_event_t * e);
+void changeTempPlotValuesSliderEvent(lv_event_t * e);
 void startBluetoothButtonEvent(lv_event_t * e);
 void startWifiStaPageButtonEvent(lv_event_t * e);
 void startWifiApPageButtonEvent(lv_event_t * e);
