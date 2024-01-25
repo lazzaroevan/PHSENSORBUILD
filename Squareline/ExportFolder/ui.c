@@ -86,15 +86,13 @@ lv_obj_t * ui_showPHButton;
 lv_obj_t * ui_Label10;
 lv_obj_t * ui_showTempButton;
 lv_obj_t * ui_Label13;
+lv_obj_t * ui_chartUnitLabel;
 lv_obj_t * ui_settingsTabPage;
 lv_obj_t * ui_TabView1;
 lv_obj_t * ui_generalSettingsTabPage;
 void ui_event_plotTimePeriodDropdown(lv_event_t * e);
 lv_obj_t * ui_plotTimePeriodDropdown;
 lv_obj_t * ui_plotTimePeriodLabel;
-void ui_event_samplingIntervalDropdown(lv_event_t * e);
-lv_obj_t * ui_samplingIntervalDropdown;
-lv_obj_t * ui_samplingIntervalLabel;
 lv_obj_t * ui_staticBatteryLabel;
 lv_obj_t * ui_UpdateBatteryLabel;
 lv_obj_t * ui_plotSettingsTabPage;
@@ -333,19 +331,11 @@ void ui_event_plotTimePeriodDropdown(lv_event_t * e)
         setPlotTimePeriodDropdownEvent(e);
     }
 }
-void ui_event_samplingIntervalDropdown(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-    lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_VALUE_CHANGED) {
-        setSamplingIntervalDropdownEvent(e);
-    }
-}
 void ui_event_TempSlider(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_VALUE_CHANGED) {
+    if(event_code == LV_EVENT_RELEASED) {
         changePHPlotValuesSliderEvent(e);
     }
 }
@@ -353,7 +343,7 @@ void ui_event_PHSlider(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_VALUE_CHANGED) {
+    if(event_code == LV_EVENT_RELEASED) {
         changeTempPlotValuesSliderEvent(e);
     }
 }

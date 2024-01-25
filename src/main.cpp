@@ -37,6 +37,8 @@ char tempBuffer[7];
 char phBuffer[7];
 char phCalLabelBuff[64];
 int samplingInterval = 100;
+int horDivLines = 0;
+int verDivLines = 0;
 float tempVal = 0;
 float phVal = 0;
 float celciusTemp = 0;
@@ -51,7 +53,8 @@ boolean sensor_string_complete = false;               //have we received all the
 char strclear[100];
 lv_chart_series_t * chartTempVals;
 lv_chart_series_t * chartPHVals;
-
+static uint32_t user_data = 10;
+lv_timer_t * graphUpdaterTimer;
 
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
@@ -85,7 +88,7 @@ void phSenseGetVal(void *pvParameters)
     Serial2.print("\r");
     while(phSenseActive)
     {
-        delay(1000);
+        delay(samplingInterval);
         Serial2.print("RT,");
         Serial2.print(celciusTemp);
         Serial2.print("\r");
@@ -103,7 +106,6 @@ void phSenseGetVal(void *pvParameters)
             if (sensor_string_complete == true) 
             {               //if a string from the Atlas Scientific product has been received in its entirety
                 phVal = sensorstring.toFloat();
-                lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal);
                 int ret = snprintf(phBuffer, 6, "%f", phVal);
                 sensorstring = "";                                //clear the string
             }
@@ -219,23 +221,21 @@ void tempSenseGetVal(void *pvParameters)
         //Serial.print("Temperature for Device 1 is: ");
         //Serial.print(sensors.getTempCByIndex(0));
         tempVal = sensors.getTempCByIndex(0);
-        lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal*1.800 + 32);
         celciusTemp = tempVal;
         if(!curUnitCelcius)
         {
             tempVal = tempVal *1.800 + 32;
         }
-        //char * degString = "\xB0";
         snprintf(tempBuffer, 6, "%f", tempVal);
-        //tempBuffer[6] = degString[0];
-        //Serial.println(buffer);
-        if(samplingInterval > 110)
-        {
-            delay(samplingInterval);
-        }
-        
+        delay(samplingInterval);        
     }
     vTaskDelete(NULL);
+}
+
+void graphUpdater(lv_timer_t * timer)
+{
+    lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal*1.800 + 32);
+    lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal);
 }
 
 void setup()
@@ -267,6 +267,8 @@ void setup()
     chartPHVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0x1f9926),LV_CHART_AXIS_PRIMARY_Y);
     lv_obj_set_style_size(ui_pHTempChart, 0, LV_PART_INDICATOR);
 
+    graphUpdaterTimer = lv_timer_create(graphUpdater, 5000,&user_data);
+    lv_timer_set_repeat_count(graphUpdaterTimer, -1);
 }
 
 void loop()
@@ -415,39 +417,6 @@ void updateTempUnitsSwitchEvent(lv_event_t * e)
     updateTempUnits();
 }
 
-void setPlotTimePeriod(int valSel)
-{
-	Serial.println("Setting Plot Time Period...");
-    switch (valSel)
-    {
-        case 0:
-            Serial.println("Set Graph for PH and Temp plots to 1 Minute");
-            break;
-        case 1:
-            Serial.println("Set Graph for PH and Temp plots to 5 Mintues");
-            break;
-        case 2:
-            Serial.println("Set Graph for PH and Temp plots to 30 Minutes");
-            break;
-        case 3:
-           Serial.println("Set Graph for PH and Temp plots to 1 Hour");
-           break;
-        case 4:
-           Serial.println("Set Graph for PH and Temp plots to 2 Hours");
-           break;
-        case 5:
-           Serial.println("Set Graph for PH and Temp plots to 1 Day");
-           break;
-        default:
-            break;
-    }
-    Serial.println("Success!");
-}
-void setPlotTimePeriodDropdownEvent(lv_event_t * e)
-{
-	setPlotTimePeriod(lv_dropdown_get_selected(ui_plotTimePeriodDropdown));
-}
-
 void setSamplingInterval(int valSel)
 {
 	Serial.println("Setting Sampling Interval...");
@@ -478,9 +447,83 @@ void setSamplingInterval(int valSel)
     }
     Serial.println("Success!");
 }
-void setSamplingIntervalDropdownEvent(lv_event_t * e)
+
+void setPlotTimePeriod(int valSel)
 {
-	setSamplingInterval(lv_dropdown_get_selected(ui_samplingIntervalDropdown));
+    Serial.println("Setting Plot Time Period...");
+    switch (valSel)
+    {
+        case 0:
+            Serial.println("Set Graph for PH and Temp plots to 1 Minute");
+            lv_chart_set_point_count(ui_pHTempChart, 60);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 7, 2, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 60);
+            horDivLines = 13;
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            lv_timer_set_period(graphUpdaterTimer,1000);
+            break;  
+        case 1:
+            Serial.println("Set Graph for PH and Temp plots to 5 Mintues");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 6 , 2, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 5);
+            horDivLines = 11;
+            setSamplingInterval(2);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        case 2:
+            Serial.println("Set Graph for PH and Temp plots to 30 Minutes");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 4 , 5, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 30);
+            horDivLines = 16;
+            setSamplingInterval(2);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        case 3:
+            Serial.println("Set Graph for PH and Temp plots to 1 Hour");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 5 , 4, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 60);
+            horDivLines = 13;
+            setSamplingInterval(2);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        case 4:
+            Serial.println("Set Graph for PH and Temp plots to 2 Hours");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 7 , 3, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 180);
+            horDivLines = 19;
+            setSamplingInterval(2);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        case 5:
+            Serial.println("Set Graph for PH and Temp plots to 1 Day");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 9 , 3, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 24);
+            horDivLines = 25;
+            setSamplingInterval(3);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        case 6:
+            Serial.println("Set Graph for PH and Temp plots to 1 Week");
+            lv_chart_set_point_count(ui_pHTempChart, 300);
+            lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 8 , 2, true, 20);
+            lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 7);
+            horDivLines = 15;
+            setSamplingInterval(4);
+            lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
+            break;
+        default:
+            break;
+    }
+    Serial.println("Success!");
+}
+void setPlotTimePeriodDropdownEvent(lv_event_t * e)
+{
+	setPlotTimePeriod(lv_dropdown_get_selected(ui_plotTimePeriodDropdown));
 }
 
 void wifiScan(void *pvParameters)
@@ -732,6 +775,11 @@ void closeBluetoothButtonEvent(lv_event_t * e)
 	closeBluetooth();
 }
 
+void changePHPlotValuesSlider(int lowRange,int highRange)
+{
+    
+    
+}
 void changePHPlotValuesSliderEvent(lv_event_t * e)
 {
 	// Your code here

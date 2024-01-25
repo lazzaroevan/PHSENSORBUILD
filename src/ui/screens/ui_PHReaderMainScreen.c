@@ -136,15 +136,15 @@ void ui_PHReaderMainScreen_screen_init(void)
 
     ui_pHTempChart = lv_chart_create(ui_chartTabPage);
     lv_obj_set_width(ui_pHTempChart, 242);
-    lv_obj_set_height(ui_pHTempChart, 173);
+    lv_obj_set_height(ui_pHTempChart, 162);
     lv_obj_set_x(ui_pHTempChart, 0);
-    lv_obj_set_y(ui_pHTempChart, -12);
+    lv_obj_set_y(ui_pHTempChart, -15);
     lv_obj_set_align(ui_pHTempChart, LV_ALIGN_CENTER);
     lv_chart_set_type(ui_pHTempChart, LV_CHART_TYPE_LINE);
     lv_chart_set_point_count(ui_pHTempChart, 15);
     lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 0, 14);
     lv_chart_set_div_line_count(ui_pHTempChart, 15, 13);
-    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 7, 2, true, 50);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 7, 2, true, 50);
     lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 3, 7, true, 50);
     lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 8, 2, true, 25);
 
@@ -186,6 +186,16 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_label_set_text(ui_Label13, "Temp");
     lv_obj_set_style_text_font(ui_Label13, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_chartUnitLabel = lv_label_create(ui_chartTabPage);
+    lv_obj_set_width(ui_chartUnitLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_chartUnitLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_chartUnitLabel, 0);
+    lv_obj_set_y(ui_chartUnitLabel, 94);
+    lv_obj_set_align(ui_chartUnitLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_chartUnitLabel, "Seconds");
+    lv_obj_set_style_text_color(ui_chartUnitLabel, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_chartUnitLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     ui_settingsTabPage = lv_tabview_add_tab(ui_mainTabView, "Settings");
     lv_obj_clear_flag(ui_settingsTabPage,
                       LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
@@ -205,7 +215,8 @@ void ui_PHReaderMainScreen_screen_init(void)
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
 
     ui_plotTimePeriodDropdown = lv_dropdown_create(ui_generalSettingsTabPage);
-    lv_dropdown_set_options(ui_plotTimePeriodDropdown, "1 Minute\n5 Minutes\n30 Minutes\n1 Hour\n2 Hours\n1 Day");
+    lv_dropdown_set_options(ui_plotTimePeriodDropdown,
+                            "1 Minute\n5 Minutes\n30 Minutes\n1 Hour\n2 Hours\n24 Hours\n1 Day\n1 Week");
     lv_obj_set_width(ui_plotTimePeriodDropdown, 126);
     lv_obj_set_height(ui_plotTimePeriodDropdown, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_plotTimePeriodDropdown, 80);
@@ -224,27 +235,6 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_obj_set_y(ui_plotTimePeriodLabel, 56);
     lv_obj_set_align(ui_plotTimePeriodLabel, LV_ALIGN_CENTER);
     lv_label_set_text(ui_plotTimePeriodLabel, "Time Period For Plots:");
-
-    ui_samplingIntervalDropdown = lv_dropdown_create(ui_generalSettingsTabPage);
-    lv_dropdown_set_options(ui_samplingIntervalDropdown, ".1 Seconds\n.5 Seconds\n1 Second\n5 Seconds\n30 Seconds");
-    lv_obj_set_width(ui_samplingIntervalDropdown, 126);
-    lv_obj_set_height(ui_samplingIntervalDropdown, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_samplingIntervalDropdown, 80);
-    lv_obj_set_y(ui_samplingIntervalDropdown, 16);
-    lv_obj_set_align(ui_samplingIntervalDropdown, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow(ui_samplingIntervalDropdown, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_samplingIntervalDropdown, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_add_flag(ui_samplingIntervalDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-
-
-
-    ui_samplingIntervalLabel = lv_label_create(ui_generalSettingsTabPage);
-    lv_obj_set_width(ui_samplingIntervalLabel, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_samplingIntervalLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_samplingIntervalLabel, -69);
-    lv_obj_set_y(ui_samplingIntervalLabel, 18);
-    lv_obj_set_align(ui_samplingIntervalLabel, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_samplingIntervalLabel, "PH Sampling Interval:");
 
     ui_staticBatteryLabel = lv_label_create(ui_generalSettingsTabPage);
     lv_obj_set_width(ui_staticBatteryLabel, LV_SIZE_CONTENT);   /// 1
@@ -383,7 +373,6 @@ void ui_PHReaderMainScreen_screen_init(void)
     lv_obj_add_event_cb(ui_ReturnToHomeButton, ui_event_ReturnToHomeButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TurnOffScreenButton, ui_event_TurnOffScreenButton, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_plotTimePeriodDropdown, ui_event_plotTimePeriodDropdown, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_samplingIntervalDropdown, ui_event_samplingIntervalDropdown, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TempSlider, ui_event_TempSlider, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_PHSlider, ui_event_PHSlider, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_startBluetoothButton, ui_event_startBluetoothButton, LV_EVENT_ALL, NULL);
