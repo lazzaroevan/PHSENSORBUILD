@@ -14,8 +14,6 @@ TaskHandle_t wifiAPTaskHandle;
 
 char WIFI_SSID[64];
 char WIFI_PASSWORD[64];
-//#define WIFI_SSID "Achilles1G"
-//#define WIFI_PASSWORD "Odysseus277"
 #define address 99                                         //default I2C ID number for EZO pH Circuit.
 const int inputOnlyRx = 35;
 const int useableTx = 22;
@@ -55,7 +53,8 @@ lv_chart_series_t * chartTempVals;
 lv_chart_series_t * chartPHVals;
 static uint32_t user_data = 10;
 lv_timer_t * graphUpdaterTimer;
-
+char phRangeBuffer[16];
+char tempRangeBuffer[16];
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
@@ -234,7 +233,7 @@ void tempSenseGetVal(void *pvParameters)
 
 void graphUpdater(lv_timer_t * timer)
 {
-    lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal*1.800 + 32);
+    lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal);
     lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal);
 }
 
@@ -266,9 +265,7 @@ void setup()
     chartTempVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0xd40c0c),LV_CHART_AXIS_SECONDARY_Y);
     chartPHVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0x1f9926),LV_CHART_AXIS_PRIMARY_Y);
     lv_obj_set_style_size(ui_pHTempChart, 0, LV_PART_INDICATOR);
-
-    graphUpdaterTimer = lv_timer_create(graphUpdater, 5000,&user_data);
-    lv_timer_set_repeat_count(graphUpdaterTimer, -1);
+    lv_chart_set_point_count(ui_pHTempChart, 60);
 }
 
 void loop()
@@ -391,6 +388,8 @@ void loadData()
             settingsFile.close();
         }
     }
+    graphUpdaterTimer = lv_timer_create(graphUpdater, 1000,&user_data);
+    lv_timer_set_repeat_count(graphUpdaterTimer, -1);
     xTaskCreate(tempSenseGetVal, "tempSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
@@ -417,7 +416,7 @@ void updateTempUnitsSwitchEvent(lv_event_t * e)
     updateTempUnits();
 }
 
-void setSamplingInterval(int valSel)
+/*void setSamplingInterval(int valSel) //Depreciated
 {
 	Serial.println("Setting Sampling Interval...");
     switch (valSel)
@@ -447,6 +446,7 @@ void setSamplingInterval(int valSel)
     }
     Serial.println("Success!");
 }
+*/
 
 void setPlotTimePeriod(int valSel)
 {
@@ -468,7 +468,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 6 , 2, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 5);
             horDivLines = 11;
-            setSamplingInterval(2);
+            lv_timer_set_period(graphUpdaterTimer,1000);
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         case 2:
@@ -477,7 +477,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 4 , 5, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 30);
             horDivLines = 16;
-            setSamplingInterval(2);
+            lv_timer_set_period(graphUpdaterTimer,30000);
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         case 3:
@@ -486,7 +486,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 5 , 4, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 60);
             horDivLines = 13;
-            setSamplingInterval(2);
+            lv_timer_set_period(graphUpdaterTimer,60000);
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         case 4:
@@ -495,7 +495,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 7 , 3, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 180);
             horDivLines = 19;
-            setSamplingInterval(2);
+            lv_timer_set_period(graphUpdaterTimer,120000);
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         case 5:
@@ -504,7 +504,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 9 , 3, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 24);
             horDivLines = 25;
-            setSamplingInterval(3);
+            lv_timer_set_period(graphUpdaterTimer,1440000);            
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         case 6:
@@ -513,7 +513,7 @@ void setPlotTimePeriod(int valSel)
             lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 7, 5, 8 , 2, true, 20);
             lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 0, 7);
             horDivLines = 15;
-            setSamplingInterval(4);
+            lv_timer_set_period(graphUpdaterTimer,10080000);
             lv_chart_set_div_line_count(ui_pHTempChart,verDivLines,horDivLines);
             break;
         default:
@@ -782,10 +782,28 @@ void changePHPlotValuesSlider(int lowRange,int highRange)
 }
 void changePHPlotValuesSliderEvent(lv_event_t * e)
 {
-	// Your code here
+    int leftVal = (int)lv_slider_get_left_value(ui_PHSlider);
+    int rightVal = (int)lv_slider_get_value(ui_PHSlider);
+    lv_snprintf(phRangeBuffer, sizeof(phRangeBuffer), "%d : %d", leftVal,rightVal);
+    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_PRIMARY_Y,leftVal,rightVal);
+    lv_label_set_text(ui_phRangeLiveLabel,phRangeBuffer);
+    lv_chart_refresh(ui_pHTempChart);
+    Serial.print("Setting values, Left: ");
+    Serial.println(leftVal);
+    Serial.print("Setting values, Right: ");
+    Serial.println(rightVal);
 }
 
 void changeTempPlotValuesSliderEvent(lv_event_t * e)
 {
-	// Your code here
+    int leftVal = (int)lv_slider_get_left_value(ui_TempSlider);
+    int rightVal = (int)lv_slider_get_value(ui_TempSlider);
+	lv_snprintf(tempRangeBuffer, sizeof(tempRangeBuffer), "%d : %d", leftVal,rightVal);
+    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_SECONDARY_Y,leftVal,rightVal);
+    lv_label_set_text(ui_tempRangeLiveLabel,tempRangeBuffer);
+    lv_chart_refresh(ui_pHTempChart);
+    Serial.print("Setting values, Left: ");
+    Serial.println(leftVal);
+    Serial.print("Setting values, Right: ");
+    Serial.println(rightVal);
 }
