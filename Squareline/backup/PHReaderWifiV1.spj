@@ -16717,7 +16717,7 @@
                                       {
                                         "nid": -1425666236,
                                         "strtype": "CALL FUNCTION/Function_name",
-                                        "strval": "changePHPlotValuesSliderEvent",
+                                        "strval": "changeTempPlotValuesSliderEvent",
                                         "InheritedType": 10
                                       },
                                       {
@@ -17051,7 +17051,7 @@
                                       {
                                         "nid": 65515097,
                                         "strtype": "CALL FUNCTION/Function_name",
-                                        "strval": "changeTempPlotValuesSliderEvent",
+                                        "strval": "changePHPlotValuesSliderEvent",
                                         "InheritedType": 10
                                       },
                                       {

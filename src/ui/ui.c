@@ -336,7 +336,7 @@ void ui_event_TempSlider(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_RELEASED) {
-        changePHPlotValuesSliderEvent(e);
+        changeTempPlotValuesSliderEvent(e);
     }
 }
 void ui_event_PHSlider(lv_event_t * e)
@@ -344,7 +344,7 @@ void ui_event_PHSlider(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_RELEASED) {
-        changeTempPlotValuesSliderEvent(e);
+        changePHPlotValuesSliderEvent(e);
     }
 }
 void ui_event_startBluetoothButton(lv_event_t * e)
