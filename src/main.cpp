@@ -1,3 +1,4 @@
+int graphResolution = 100;
 #include <Arduino.h>
 #include <string.h>
 #include <map>
@@ -8,7 +9,6 @@
 #include <WiFi.h>
 #include <HardwareSerial.h>
 #include <fileServer.h>
-
 
 TaskHandle_t wifiAPTaskHandle;
 
@@ -55,6 +55,7 @@ static uint32_t user_data = 10;
 lv_timer_t * graphUpdaterTimer;
 char phRangeBuffer[16];
 char tempRangeBuffer[16];
+
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
@@ -233,8 +234,8 @@ void tempSenseGetVal(void *pvParameters)
 
 void graphUpdater(lv_timer_t * timer)
 {
-    lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal);
-    lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal);
+    lv_chart_set_next_value(ui_pHTempChart,chartTempVals , tempVal*graphResolution);
+    lv_chart_set_next_value(ui_pHTempChart,chartPHVals , phVal*graphResolution);
 }
 
 void setup()
@@ -266,6 +267,8 @@ void setup()
     chartPHVals = lv_chart_add_series(ui_pHTempChart,lv_color_hex(0x1f9926),LV_CHART_AXIS_PRIMARY_Y);
     lv_obj_set_style_size(ui_pHTempChart, 0, LV_PART_INDICATOR);
     lv_chart_set_point_count(ui_pHTempChart, 60);
+    lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 0, 14*graphResolution);
+    lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_SECONDARY_Y, 0, 100*graphResolution);
 }
 
 void loop()
@@ -782,10 +785,12 @@ void changePHPlotValuesSlider(int lowRange,int highRange)
 }
 void changePHPlotValuesSliderEvent(lv_event_t * e)
 {
-    int leftVal = (int)lv_slider_get_left_value(ui_PHSlider);
-    int rightVal = (int)lv_slider_get_value(ui_PHSlider);
-    lv_snprintf(phRangeBuffer, sizeof(phRangeBuffer), "%d : %d", leftVal,rightVal);
-    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_PRIMARY_Y,leftVal,rightVal);
+    float leftVal = (float)lv_slider_get_left_value(ui_PHSlider)/graphResolution;
+    float rightVal = (float)lv_slider_get_value(ui_PHSlider)/graphResolution;
+    int leftValInt = (int)lv_slider_get_left_value(ui_PHSlider);
+    int rightValInt = (int)lv_slider_get_value(ui_PHSlider);
+    snprintf(phRangeBuffer, sizeof(phRangeBuffer), "%.2f : %.2f", leftVal,rightVal);
+    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_PRIMARY_Y,leftValInt,rightValInt);
     lv_label_set_text(ui_phRangeLiveLabel,phRangeBuffer);
     lv_chart_refresh(ui_pHTempChart);
     Serial.print("Setting values, Left: ");
@@ -796,9 +801,9 @@ void changePHPlotValuesSliderEvent(lv_event_t * e)
 
 void changeTempPlotValuesSliderEvent(lv_event_t * e)
 {
-    int leftVal = (int)lv_slider_get_left_value(ui_TempSlider);
-    int rightVal = (int)lv_slider_get_value(ui_TempSlider);
-	lv_snprintf(tempRangeBuffer, sizeof(tempRangeBuffer), "%d : %d", leftVal,rightVal);
+    float leftVal = (float)lv_slider_get_left_value(ui_TempSlider)/graphResolution;
+    float rightVal = (float)lv_slider_get_value(ui_TempSlider)/graphResolution;
+	snprintf(tempRangeBuffer, sizeof(tempRangeBuffer), "%.2f : %.2f", leftVal,rightVal);
     lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_SECONDARY_Y,leftVal,rightVal);
     lv_label_set_text(ui_tempRangeLiveLabel,tempRangeBuffer);
     lv_chart_refresh(ui_pHTempChart);

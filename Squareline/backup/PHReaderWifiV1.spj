@@ -16622,7 +16622,7 @@
                                 "strtype": "SLIDER/Range",
                                 "intarray": [
                                   0,
-                                  100
+                                  1000
                                 ],
                                 "InheritedType": 7
                               },
@@ -16635,7 +16635,7 @@
                               {
                                 "nid": -1399562763,
                                 "strtype": "SLIDER/Value",
-                                "integer": 100,
+                                "integer": 1000,
                                 "InheritedType": 6
                               },
                               {
@@ -16956,7 +16956,7 @@
                                 "strtype": "SLIDER/Range",
                                 "intarray": [
                                   0,
-                                  14
+                                  1400
                                 ],
                                 "InheritedType": 7
                               },
@@ -16969,7 +16969,7 @@
                               {
                                 "nid": 1713772679,
                                 "strtype": "SLIDER/Value",
-                                "integer": 14,
+                                "integer": 1400,
                                 "InheritedType": 6
                               },
                               {
@@ -29782,7 +29782,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "C:\\Users\\benl\\Documents\\PlatformIO\\Projects\\PHSENSORBUILD\\Squareline\\ExportFolder",
     "projectExportFolderPath": "C:\\Users\\benl\\Documents\\PlatformIO\\Projects\\PHSENSORBUILD\\Squareline\\ExportFolder",
-    "backup_cnt": 1020,
+    "backup_cnt": 1022,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "CPP_FILE",

@@ -264,8 +264,9 @@ void ui_PHReaderMainScreen_screen_init(void)
                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
 
     ui_TempSlider = lv_slider_create(ui_plotSettingsTabPage);
+    lv_slider_set_range(ui_TempSlider, 0, 10000);
     lv_slider_set_mode(ui_TempSlider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_value(ui_TempSlider, 100, LV_ANIM_OFF);
+    lv_slider_set_value(ui_TempSlider, 10000, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_TempSlider) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_TempSlider, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_TempSlider, 280);
     lv_obj_set_height(ui_TempSlider, 10);
@@ -275,9 +276,9 @@ void ui_PHReaderMainScreen_screen_init(void)
 
 
     ui_PHSlider = lv_slider_create(ui_plotSettingsTabPage);
-    lv_slider_set_range(ui_PHSlider, 0, 14);
+    lv_slider_set_range(ui_PHSlider, 0, 1400);
     lv_slider_set_mode(ui_PHSlider, LV_SLIDER_MODE_RANGE);
-    lv_slider_set_value(ui_PHSlider, 14, LV_ANIM_OFF);
+    lv_slider_set_value(ui_PHSlider, 1400, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_PHSlider) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_PHSlider, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_PHSlider, 280);
     lv_obj_set_height(ui_PHSlider, 10);
