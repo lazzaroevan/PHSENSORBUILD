@@ -55,7 +55,10 @@ static uint32_t user_data = 10;
 lv_timer_t * graphUpdaterTimer;
 char phRangeBuffer[16];
 char tempRangeBuffer[16];
-
+float tempValLeft = 0;
+float tempValRight = 100;
+float phValLeft = 0;
+float phValRight = 14;
 
 void serialEvent()                                                               //this interrupt will trigger when the data coming from the serial monitor(pc/mac/other) is received.
 {                                                                                //if the hardware serial port_0 receives a char
@@ -269,6 +272,9 @@ void setup()
     lv_chart_set_point_count(ui_pHTempChart, 60);
     lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 0, 14*graphResolution);
     lv_chart_set_range(ui_pHTempChart, LV_CHART_AXIS_SECONDARY_Y, 0, 100*graphResolution);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_X, 10, 5, 7, 3, true, 40);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 3, 2, true, 50);
+    lv_chart_set_axis_tick(ui_pHTempChart, LV_CHART_AXIS_SECONDARY_Y, 10, 5, 8, 4, true, 50);
 }
 
 void loop()
@@ -303,6 +309,60 @@ void loop()
         lv_chart_hide_series(ui_pHTempChart, chartTempVals, false);
     }
     lv_timer_handler();
+}
+
+static void draw_event_cb(lv_event_t * e)
+{
+    lv_obj_draw_part_dsc_t * dsc = lv_event_get_draw_part_dsc(e);
+    if(!lv_obj_draw_part_check_type(dsc, &lv_chart_class, LV_CHART_DRAW_PART_TICK_LABEL)) return;
+
+    if(dsc->id == LV_CHART_AXIS_PRIMARY_Y && dsc->text) 
+    {
+        float addition = (phValRight - phValLeft)/2;
+        char label0[50];
+        sprintf (label0, "%f", phValLeft);
+        char label1[50];
+        sprintf (label1, "%f", phValLeft + 1 * addition);
+        char label2[50];
+        sprintf (label2, "%f", phValLeft + 2 * addition);
+        const char * phs[] = {label0,label1,label2};
+        for(int i = 0; i<3;i++)
+        {
+            Serial.print(phs[i]);
+            Serial.print(',');
+        }
+        Serial.println("");
+        //lv_snprintf(dsc->text, dsc->text_length, "%s", phs[dsc->value]);
+    }
+    if(dsc->id == LV_CHART_AXIS_SECONDARY_Y && dsc->text) 
+    {
+        float addition = (tempValRight - tempValLeft)/7;
+        char label0[50];
+        sprintf (label0, "%f", tempValLeft);
+        char label1[50];
+        sprintf (label1, "%f", tempValLeft + 1 * addition);
+        char label2[50];
+        sprintf (label2, "%f", tempValLeft + 2 * addition);
+        char label3[50];
+        sprintf (label3, "%f", tempValLeft + 3 * addition);
+        char label4[50];
+        sprintf (label4, "%f", tempValLeft + 4 * addition);
+        char label5[50];
+        sprintf (label5, "%f", tempValLeft + 5 * addition);
+        char label6[50];
+        sprintf (label6, "%f", tempValLeft + 6 * addition);
+        char label7[50];
+        sprintf (label7, "%f", tempValLeft + 7 * addition);
+
+        const char * temps[] = {label0,label1,label2,label3,label4,label5,label6,label7};
+        for(int i = 0; i<8;i++)
+        {
+            Serial.print(temps[i]);
+            Serial.print(',');
+        }
+        Serial.println("");
+        //lv_snprintf(dsc->text, dsc->text_length, "%s", temps[dsc->value]);
+    }
 }
 
 void loadData()
@@ -393,6 +453,7 @@ void loadData()
     }
     graphUpdaterTimer = lv_timer_create(graphUpdater, 1000,&user_data);
     lv_timer_set_repeat_count(graphUpdaterTimer, -1);
+    lv_obj_add_event_cb(ui_pHTempChart, draw_event_cb, LV_EVENT_DRAW_PART_BEGIN, NULL);
     xTaskCreate(tempSenseGetVal, "tempSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
     xTaskCreate(phSenseGetVal, "phSenseLoop", 20000, NULL, tskIDLE_PRIORITY, NULL);
 }
@@ -792,6 +853,8 @@ void changePHPlotValuesSliderEvent(lv_event_t * e)
     snprintf(phRangeBuffer, sizeof(phRangeBuffer), "%.2f : %.2f", leftVal,rightVal);
     lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_PRIMARY_Y,leftValInt,rightValInt);
     lv_label_set_text(ui_phRangeLiveLabel,phRangeBuffer);
+    phValLeft = leftVal;
+    phValRight = rightVal;
     lv_chart_refresh(ui_pHTempChart);
     Serial.print("Setting values, Left: ");
     Serial.println(leftVal);
@@ -803,9 +866,13 @@ void changeTempPlotValuesSliderEvent(lv_event_t * e)
 {
     float leftVal = (float)lv_slider_get_left_value(ui_TempSlider)/graphResolution;
     float rightVal = (float)lv_slider_get_value(ui_TempSlider)/graphResolution;
+    int leftValInt = (int)lv_slider_get_left_value(ui_PHSlider);
+    int rightValInt = (int)lv_slider_get_value(ui_PHSlider);
 	snprintf(tempRangeBuffer, sizeof(tempRangeBuffer), "%.2f : %.2f", leftVal,rightVal);
-    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_SECONDARY_Y,leftVal,rightVal);
+    lv_chart_set_range(ui_pHTempChart,LV_CHART_AXIS_SECONDARY_Y,leftValInt,rightValInt);
     lv_label_set_text(ui_tempRangeLiveLabel,tempRangeBuffer);
+    tempValLeft = leftVal;
+    tempValRight = rightVal;
     lv_chart_refresh(ui_pHTempChart);
     Serial.print("Setting values, Left: ");
     Serial.println(leftVal);
